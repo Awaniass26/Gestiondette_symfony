@@ -1,0 +1,240 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DetteController!
+{% endblock %}
+
+{% block body %}
+	<style>
+		input[type="file"] {
+			display: block;
+			width: 100%;
+			padding: 10px;
+			font-size: 14px;
+			color: #333;
+			background-color: #fff;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			text-align: left;
+			cursor: pointer;
+		}
+
+		/* Facultatif : Apparence au focus */
+		input[type="file"]:focus {
+			outline: none;
+			border-color: black;
+			box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+		}
+
+		.toggle-switch {
+			position: relative;
+			display: inline-block;
+			width: 60px;
+			height: 34px;
+		}
+
+		.toggle-switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+		.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #e5e7eb;
+			border-radius: 9999px;
+			transition: background-color 0.3s, box-shadow 0.3s;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		}
+
+		.slider:before {
+			position: absolute;
+			content: "";
+			height: 26px;
+			width: 26px;
+			border-radius: 50%;
+			left: 4px;
+			bottom: 4px;
+			background-color: white;
+			transition: transform 0.3s;
+		}
+
+		input:checked+.slider {
+			background-color: #34d399;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+		}
+		input:checked+.slider:before {
+			transform: translateX(26px);
+		}
+	</style>
+
+	<div class="mt-8 mx-4 md:mx-8 rounded-xl bg-white p-4 shadow-sm">
+		<div
+			class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<!-- Nouveau Client Section -->
+			<div class="bg-white rounded-lg shadow-md p-6">
+				<h2 class="text-2xl font-bold mb-6 text-blue-800">
+					<i class="fas fa-user-plus mr-2"></i>Nouveau Client</h2>
+
+				<form id="search-form" method="POST" action="{{ path('app_client') }}" enctype="multipart/form-data" class="space-y-4">
+					<div class="form-row mb-4 flex items-center ">
+						<label for="prenom" class="w-full sm:w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center mr-12">
+							<i class="fas fa-user mr-2"></i>Prénom</label>
+						<input type="text" id="prenom" name="prenom" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+					</div>
+					<div class="form-row mb-4 flex items-center">
+						<label for="nom" class="w-full sm:w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center mr-12">
+							<i class="fas fa-user mr-2"></i>Nom
+						</label>
+						<input type="text" id="nom" name="nom" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+					</div>
+
+					<div class="form-row mb-4 flex items-center ">
+						<label for="telephone" class="w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center mr-12">
+							<i class="fas fa-phone mr-2"></i>Téléphone</label>
+						<input type="tel" id="telephone" name="telephone" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+					</div>
+					<div class="form-row mb-4 flex items-center ">
+						<label for="adresse" class="w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center mr-12">
+							<i class="fas fa-map-marker-alt mr-2"></i>Adresse</label>
+						<input type="text" id="adresse" name="adresse" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+					</div>
+					<div class="form-row mb-4 flex items-center ">
+						<label for="photo" class="w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center mr-12">
+							<i class="fas fa-camera mr-2"></i>Photo</label>
+						<input type="file" id="photo" name="photo" class="input-shadow flex-grow p-2">
+					</div>
+
+					<!-- Toggle pour Création de Compte -->
+					<div class="mb-4 flex items-center">
+						<span class="toggle-label mr-2">Créer un compte :</span>
+						<label class="toggle-switch">
+							<input type="checkbox" id="creerCompte" class="sr-only" onchange="toggleAccountFields()">
+							<span class="slider"></span>
+						</label>
+						<span class="toggle-label ml-2 text-gray-700 font-semibold" id="toggleLabel">Non</span>
+					</div>
+
+					<!-- Champs Supplémentaires pour la Création de Compte -->
+					<div
+						id="accountFields" class="hidden">
+						<!-- Champ Login -->
+						<div class="form-row mb-4 flex items-center space-x-2">
+							<label for="login" class="w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center">
+								<i class="fas fa-envelope mr-2"></i>Login</label>
+							<input type="text" id="login" name="login" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+						</div>
+
+						<!-- Champ Password -->
+						<div class="form-row mb-2 flex items-center space-x-2">
+							<label for="password" class="w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center">
+								<i class="fas fa-lock mr-2"></i>Password</label>
+							<input type="password" id="password" name="password" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+						</div>
+					</div>
+
+					<div class="flex justify-center">
+						<button type="reset" class="btn font-bold bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 mr-12">
+							<i class="fas fa-times mr-2"></i>Annuler</button>
+						<button type="submit" class="btn font-bold bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow-md">
+							<i class="fas fa-save mr-2"></i>Enregistrer</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- Suivi Dette Section -->
+			<div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+				<h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-blue-800">
+					<i class="fas fa-search-dollar mr-2"></i>Suivi de Dette
+				</h2>
+				<form id="search-form" class="mb-4 flex flex-col sm:flex-row gap-2" method="POST" action="{{ path('app_recherche_client') }}">
+					<input type="hidden" name="action" value="searchClient">
+					<label for="telephone" class="w-full sm:w-auto flex-shrink-0 font-semibold text-gray-700 flex items-center">
+						<i class="fas fa-phone mr-2"></i>Tél :
+					</label>
+					<input type="tel" id="telephone" name="telephone" class="input-shadow flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+					<button type="submit" class="btn bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 mt-2 sm:mt-0">
+						<i class="fas fa-search mr-2"></i>OK
+					</button>
+				</form>
+				<!-- Boutons organisés et centrés -->
+				<div class="mb-4 flex flex-wrap justify-start gap-4 sm:gap-2">
+					<button class="bg-red-500 text-white px-4 py-2 rounded flex items-center">
+						<i class="fas fa-user mr-2"></i>Infos
+					</button>
+					{% if client and client.telephone %}
+						<a href="{{ path('app_dettelist', {'telephone': client.telephone}) }}" class="flex">
+							<button class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex items-center">
+								<i class="fas fa-file-invoice-dollar mr-2"></i>Dettes
+							</button>
+						</a>
+					{% endif %}
+					<a href="../Boutiquier/nouvelleDette.html" class="flex">
+						<button class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex items-center">
+							<i class="fas fa-plus mr-2"></i>Nouvelle
+						</button>
+					</a>
+				</div>
+				<!-- Résultats de la recherche -->
+				<div
+					class="flex flex-col items-center">
+					<!-- Photo de l'utilisateur -->
+					<div
+						class="flex flex-col items-center">
+						<!-- Photo de l'utilisateur -->
+						<div id="client-photo" class="w-32 h-32 sm:w-40 sm:h-40 bg-gray-300 rounded-full overflow-hidden mb-4">
+							<div class="w-full h-full flex items-center justify-center text-gray-500">
+								{% if client is not null and client.photo %}
+									<img src="{{ asset(client.photo) }}" alt="Photo test" class="w-full h-full object-cover">
+								{% else %}
+									<i class="fas fa-user-circle text-4xl sm:text-6xl"></i>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Champs de saisie et Code QR -->
+					<div class="w-full flex flex-col sm:flex-row justify-between gap-4">
+						<div class="space-y-4 flex-grow">
+							<div class="mb-2">
+								<label for="nom" class="block font-semibold text-gray-700 mb-1">
+									<i class="fas fa-user mr-2"></i>Nom :
+								</label>
+								<input type="text" id="nom" name="nom" value="{{ client is not null ? client.nom : '' }}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+							</div>
+
+							<div class="mb-2">
+								<label for="prenom" class="block font-semibold text-gray-700 mb-1">
+									<i class="fas fa-user mr-2"></i>Prénom :
+								</label>
+								<input type="text" id="prenom" name="prenom" value="{{client is not null ? client.prenom : '' }}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+							</div>
+							<div class="mb-2">
+								<label for="adresse" class="block font-semibold text-gray-700 mb-1">
+									<i class="fas fa-map-marker-alt mr-2"></i>Adresse																																										                :
+								</label>
+								<input type="text" id="adresse" name="adresse" value="{{ client is not null ? client.adresse : '' }}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+							</div>
+						</div>
+
+						<!-- Espace pour afficher le code QR -->
+						<div class="flex items-center justify-center">
+							<div
+								id="qr-code" class="w-40 h-40 sm:w-48 sm:h-48 border border-gray-300 flex items-center justify-center">
+								<!-- Remplacez cette image par un vrai code QR -->
+								<img src="{{ asset('uploads/photos/qr.jpg') }}" alt="Code QR" class="w-full h-full object-contain">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="{{ asset('js/dette.js') }}"></script>
+
+{% endblock %}

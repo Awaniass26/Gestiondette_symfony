@@ -1,0 +1,190 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DashboardController!
+{% endblock %}
+
+{% block body %}
+	<style>
+		.example-wrapper {
+			margin: 1em auto;
+			max-width: 800px;
+			width: 95%;
+			font: 18px / 1.5 sans-serif;
+		}
+		.example-wrapper code {
+			background: #F5F5F5;
+			padding: 2px 6px;
+		}
+	</style>
+	<div class="mt-8 mx-4 md:mr-8 rounded-xl bg-white p-4 shadow-sm flex flex-col">
+		<div class="p-8" style="background: linear-gradient(to right, #2b6cb0, #2d3748)">
+			<div
+				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+				<!-- Carte Total des Dettes -->
+				<div class="stat-card rounded-lg p-6 text-white" id="total-dettes-card">
+					<div class="flex items-center mb-4">
+						<div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center mr-4">
+							<i class="fas fa-money-bill-wave text-xl"></i>
+						</div>
+						<h3 class="text-lg font-semibold">Total des Dettes</h3>
+					</div>
+					<p class="text-3xl font-bold mb-2" id="total-dettes">500.000 CFA</p>
+					<div class="flex items-center text-sm">
+						<i class="fas fa-arrow-up mr-1 text-green-400"></i>
+						<span class="text-green-400" id="dettes-percent">3.5%</span>
+						<span class="ml-2 text-gray-300">depuis le mois dernier</span>
+					</div>
+				</div>
+
+				<!-- Carte Nombre de Clients -->
+				<div class="stat-card rounded-lg p-6 text-white" id="clients-card">
+					<div class="flex items-center mb-4">
+						<div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center mr-4">
+							<i class="fas fa-users text-xl"></i>
+						</div>
+						<h3 class="text-lg font-semibold">Nombre de Clients</h3>
+					</div>
+					<p class="text-3xl font-bold mb-2" id="nombre-clients">120</p>
+					<div class="flex items-center text-sm">
+						<i class="fas fa-arrow-up mr-1 text-green-400"></i>
+						<span class="text-green-400" id="clients-percent">5%</span>
+						<span class="ml-2 text-gray-300">depuis la semaine dernière</span>
+					</div>
+				</div>
+
+				<!-- Carte Articles en Stock -->
+				<div class="stat-card rounded-lg p-6 text-white" id="articles-en-stock-card">
+					<div class="flex items-center mb-4">
+						<div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center mr-4">
+							<i class="fas fa-boxes text-xl"></i>
+						</div>
+						<h3 class="text-lg font-semibold">Articles en Stock</h3>
+					</div>
+					<p class="text-3xl font-bold mb-2" id="articles-en-stock">250</p>
+					<div class="flex items-center text-sm">
+						<i class="fas fa-arrow-down mr-1 text-red-400"></i>
+						<span class="text-red-400" id="articles-percent">2%</span>
+						<span class="ml-2 text-gray-300">depuis hier</span>
+					</div>
+				</div>
+
+				<!-- Carte Demandes en Cours -->
+				<div class="stat-card rounded-lg p-6 text-white" id="demandes-en-cours-card">
+					<div class="flex items-center mb-4">
+						<div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center mr-4">
+							<i class="fas fa-exclamation-circle text-xl"></i>
+						</div>
+						<h3 class="text-lg font-semibold">Demandes en Cours</h3>
+					</div>
+					<p class="text-3xl font-bold mb-2" id="demandes-en-cours">15</p>
+					<div class="flex items-center text-sm">
+						<i class="fas fa-arrow-up mr-1 text-green-400"></i>
+						<span class="text-green-400" id="demandes-percent">10%</span>
+						<span class="ml-2 text-gray-300">depuis hier</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<section
+			class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<!-- Tableau des Clients -->
+			<div class="overflow-x-auto w-[600px] ml-0">
+				<h2 class="text-xl font-semibold text-gray-800 mb-4">Liste des Clients</h2>
+				<div class="overflow-x-auto">
+					<table class="bg-white shadow-lg rounded-lg w-[500px]">
+						<thead>
+							<tr>
+								<th class="py-3 px-6 text-center">Nom</th>
+								<th class="py-3 px-6 text-center">Prénom</th>
+								<th class="py-3 px-6 text-center">Telephone</th>
+								<th class="py-3 px-6 text-center">Montant Dette</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for client in clients %}
+								<tr>
+									<td class="py-3 px-6 text-center">{{ client.nom }}</td>
+									<td class="py-3 px-6 text-center">{{ client.prenom }}</td>
+									<td class="py-3 px-6 text-center">{{ client.telephone }}</td>
+									<td class="py-3 px-6 text-center">{{ client.montantDette }}
+										CFA</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="4" class="text-center py-3">Aucun client disponible</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+
+					<!-- Pagination des Clients -->
+					<div class="pagination mt-4 flex justify-start space-x-2">
+						{% if pageClients > 1 %}
+							<a href="{{ path('app_dashboard', { 'page_clients': pageClients - 1 }) }}" class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">
+								<i class="fas fa-chevron-left"></i>
+							</a>
+						{% endif %}
+						{% for i in 1..nbrePagesClients %}
+							<a href="{{ path('app_dashboard', { 'page_clients': i }) }}" class="{% if i == pageClients %}px-3 py-1 bg-blue-500 text-white rounded{% else %}px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300{% endif %}">{{ i }}</a>
+						{% endfor %}
+						{% if pageClients < nbrePagesClients %}
+							<a href="{{ path('app_dashboard', { 'page_clients': pageClients + 1 }) }}" class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">
+								<i class="fas fa-chevron-right"></i>
+							</a>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+
+			<!-- Tableau des Articles en Rupture de Stock -->
+			<div class="overflow-x- ml-10 w-[420px]">
+				<h2 class="text-xl font-semibold text-gray-800 mb-4">Articles en Rupture de Stock</h2>
+				<div class="overflow-x-auto">
+					<table class="bg-white shadow-lg rounded-lg w-[450px]">
+						<thead>
+							<tr>
+								<th class="py-3 px-6 text-center">Article</th>
+								<th class="py-3 px-6 text-center">Quantité Restante</th>
+								<th class="py-3 px-6 text-center">Prix</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for article in articles %}
+								<tr>
+									<td class="py-3 px-6 text-center">{{ article.nomArticle }}</td>
+									<td class="py-3 px-6 text-center">{{ article.quantiteRestante }}</td>
+									<td class="py-3 px-6 text-center">{{ article.prix }}
+										CFA</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="3" class="text-center py-3">Aucun article en rupture</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+
+					<!-- Pagination des Articles -->
+					<div class="pagination mt-4 flex justify-end space-x-2">
+						{% if pageArticles > 1 %}
+							<a href="{{ path('app_dashboard', { 'page_articles': pageArticles - 1 }) }}" class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">
+								<i class="fas fa-chevron-left"></i>
+							</a>
+						{% endif %}
+						{% for i in 1..nbrePagesArticles %}
+							<a href="{{ path('app_dashboard', { 'page_articles': i }) }}" class="{% if i == pageArticles %}px-3 py-1 bg-blue-500 text-white rounded{% else %}px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300{% endif %}">{{ i }}</a>
+						{% endfor %}
+						{% if pageArticles < nbrePagesArticles %}
+							<a href="{{ path('app_dashboard', { 'page_articles': pageArticles + 1 }) }}" class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">
+								<i class="fas fa-chevron-right"></i>
+							</a>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</section>
+
+	</div>
+	<script src="{{ asset('js/dashboard.js') }}"></script>
+
+{% endblock %}
