@@ -13,7 +13,7 @@ class DemandeArticle
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'demandeArticles')]
+    #[ORM\ManyToOne(inversedBy: 'demandeArticles', cascade: ['persist'])]
     private ?Demande $demande = null;
 
     #[ORM\ManyToOne(inversedBy: 'demandeArticles')]

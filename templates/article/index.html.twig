@@ -50,7 +50,7 @@
 	<main class="mt-8 mx-4 md:mr-8 rounded-xl bg-white p-4 shadow-sm flex flex-col main-content">
 		<div class="mb-4 flex justify-between flex-wrap">
 			<span class="text-gray-600 text-xl font-bold mb-2 sm:mb-0">Approvisionnement</span>
-			<button class="bg-blue-500 text-white px-4 py-2 rounded" data-modal-target="articleModal" data-modal-toggle="articleModal">Nouvelle Article</button>
+			<button class="bg-blue-500 text-white px-4 py-2 rounded" data-modal-target="articleModal" data-modal-toggle="articleModal" id="openArticleModal" >Nouvelle Article</button>
 		</div>
 		<div class="product-lists">
 			<div class="product-list bg-white rounded-lg shadow p-4 mb-4">
@@ -161,7 +161,7 @@
 		<!-- Modal header -->
 		<div class="flex justify-between items-center p-4 border-b rounded-t">
 			<h3 class="text-xl font-semibold text-gray-900">Nouvel Article</h3>
-			<button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="articleModal">
+			<button id="closeModal" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="articleModal">
 				<svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 					<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
 				</svg>
@@ -188,7 +188,7 @@
 			</div>
 			<div class="mb-4">
 				<label for="categories" class="block text-sm font-medium text-gray-700">Categories</label>
-				<select class="block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+				<select class="block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" id="categories">
 					<option value="alimentaire">Alimentaire</option>
 					<option value="cosmetique">Cosmetique</option>
 					<option value="electronique">Electronique</option>
@@ -201,8 +201,8 @@
 		</div>
 		<!-- Modal footer -->
 		<div class="flex justify-end p-6 space-x-2 border-t modal-footer">
-			<button data-modal-hide="articleModal" type="button" class="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-sm px-5 py-2.5 w-full sm:w-auto">Annuler</button>
-			<button type="button" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 w-full sm:w-auto">Enregistrer</button>
+			<button data-modal-hide="articleModal" type="button" class="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-sm px-5 py-2.5 w-full sm:w-auto" id="cancelBtn">Annuler</button>
+			<button type="button" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 w-full sm:w-auto" id="submit-article">Enregistrer</button>
 		</div>
 	</div>
 </div></div><script>
@@ -221,7 +221,6 @@ function updateSelectedProducts() {
                 id: checkbox.dataset.id,
                 name: checkbox.dataset.name,
                 price: parseFloat(checkbox.dataset.price),
-				stock: parseInt(checkbox.dataset.stock),
                 quantity: 1
             };
             selectedProducts.push(product);
@@ -232,6 +231,17 @@ function updateSelectedProducts() {
 	    updateTotalPrice();
 
 }
+
+function updateTotalPrice() {
+    let totalPrice = 0;
+    // Loop through selected products and calculate the total price
+    selectedProducts.forEach(product => {
+        totalPrice += product.price * product.quantity;
+    });
+    // Update the total price display
+    document.getElementById('total-price').value = totalPrice.toFixed(2);
+}
+
 
 function renderSelectedProducts() {
     const tbody = document.getElementById('selected-products-body');
@@ -320,4 +330,127 @@ function goToPage(page) {
     currentPage = page;
     renderSelectedProducts();
 }
+
+function loadProducts() {
+    const savedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
+    const productTableBody = document.querySelector("#product-table tbody");
+
+    // Effacez le contenu actuel du tableau
+    productTableBody.innerHTML = '';
+
+    // Ajoutez les produits sauvegardés dans le tableau
+    savedProducts.forEach(product => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td class="p-2 text-center">
+                <input type="checkbox" class="product-checkbox" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-stock="${product.stock}" onclick="updateSelectedProducts()">
+            </td>
+            <td class="py-2 px-4 text-center">${product.name}</td>
+            <td class="py-2 px-4 text-center">${product.price}</td>
+            <td class="py-2 px-4 text-center">${product.stock}</td>
+        `;
+
+        productTableBody.appendChild(row);
+    });
+
+
+}
+
+
+// Variables
+const openModalBtn = document.getElementById('openArticleModal');
+const closeModalBtn = document.getElementById('closeModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const saveBtn = document.getElementById('saveBtn');
+const modal = document.getElementById('articleModal');
+
+// Ouvrir le modal
+openModalBtn.addEventListener('click', () => {
+  modal.classList.remove('hidden');
+});
+
+// Fermer le modal
+closeModalBtn.addEventListener('click', () => {
+  modal.classList.add('hidden');
+});
+
+// Annuler
+cancelBtn.addEventListener('click', () => {
+  modal.classList.add('hidden');
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+const libelle = document.getElementById('libelle').value;
+  const prixUnitaire = document.getElementById('prixUnitaire').value;
+  const quantite = document.getElementById('quantite').value;
+  const prixDetails = document.getElementById('prixDetails').value;
+  const categorie = document.getElementById('categories').value;
+  const promotion = document.getElementById('promotion').value;
+
+  if (libelle && prixUnitaire && quantite && prixDetails && categorie) {
+    // Ajouter l'article à la liste des produits (first list)
+    const newProduct = {
+      libelle,
+      prixUnitaire,
+      quantite,
+      prixDetails,
+      categorie,
+      promotion
+    };
+    
+    console.log('Article enregistré :', newProduct);
+
+    // Vous pouvez ajouter ici l'article à une liste d'articles existante dans votre application
+
+    modal.classList.add('hidden');
+  } else {
+    alert("Tous les champs doivent être remplis");
+  }        });
+    }
+});
+
+
+
+    // Fonction pour ajouter l'article créé dans la liste
+    document.getElementById('submit-article').addEventListener('click', function() {
+        // Récupérer les valeurs des champs
+        var libelle = document.getElementById('libelle').value;
+        var prixUnitaire = document.getElementById('prixUnitaire').value;
+        var quantite = document.getElementById('quantite').value;
+        var prixDetails = document.getElementById('prixDetails').value;
+        var categories = document.getElementById('categories').value;
+
+        // Créer une nouvelle ligne pour la table des produits
+        var table = document.getElementById('product-table').getElementsByTagName('tbody')[0];
+        var newRow = table.insertRow(table.rows.length);
+
+        // Ajouter les cellules dans la nouvelle ligne
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+
+        // Remplir les cellules avec les valeurs de l'article
+        cell1.innerHTML = '<input type="checkbox" class="product-checkbox" data-name="' + libelle + '" data-price="' + prixUnitaire + '" data-stock="' + quantite + '" onclick="updateSelectedProducts()">';
+        cell2.innerHTML = libelle;
+        cell3.innerHTML = prixUnitaire;
+        cell4.innerHTML = quantite;
+
+        // Fermer le modal après avoir ajouté l'article
+        document.getElementById('articleModal').style.display = 'none';
+
+        // Réinitialiser les champs du formulaire
+        document.getElementById('libelle').value = '';
+        document.getElementById('prixUnitaire').value = '';
+        document.getElementById('quantite').value = '';
+        document.getElementById('prixDetails').value = '';
+        document.getElementById('categories').value = 'alimentaire';
+    });
+
+
 </script>{% endblock %}

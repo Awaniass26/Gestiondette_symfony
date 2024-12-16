@@ -36,6 +36,9 @@ class Demande
     #[ORM\OneToMany(targetEntity: DemandeArticle::class, mappedBy: 'demande')]
     private Collection $demandeArticles;
 
+    #[ORM\Column(length: 255)]
+    private ?string $statut = null;
+
     public function __construct()
     {
         $this->demandeArticles = new ArrayCollection();
@@ -135,5 +138,25 @@ class Demande
 
         return $this;
     }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
+
+        return $this;
+    }
+
+
+    public function getArticles(): Collection
+{
+    return $this->demandeArticles->map(function (DemandeArticle $demandeArticle) {
+        return $demandeArticle->getArticle();
+    });
+}
 
 }
