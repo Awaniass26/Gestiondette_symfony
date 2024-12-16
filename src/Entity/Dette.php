@@ -39,8 +39,8 @@ class Dette
     /**
      * @var Collection<int, DetteArticle>
      */
-    #[ORM\OneToMany(targetEntity: DetteArticle::class, mappedBy: 'dette')]
-    private Collection $detteArticles;
+    #[ORM\OneToMany(targetEntity: DetteArticle::class, mappedBy: 'dette', cascade: ['persist'])]
+    private Collection $detteArticles;    
 
     #[ORM\ManyToOne(inversedBy: 'dettes')]
     private ?Article $article = null;
@@ -188,5 +188,17 @@ class Dette
 
         return $this;
     }
+
+    public function addArticle(Article $article): static
+{
+    $detteArticle = new DetteArticle();
+    $detteArticle->setDette($this);
+    $detteArticle->setArticle($article);
+
+    $this->addDetteArticle($detteArticle);
+
+    return $this;
+}
+
 
 }

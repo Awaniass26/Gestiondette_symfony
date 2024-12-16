@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DetteController!
+{% endblock %}
+
+{% block body %}
+	<style>
+		.card {
+			background: #ffffff;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			border-radius: 0.375rem;
+			padding: 1.5rem;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+		}
+
+		.card h3 {
+			font-size: 1.125rem;
+			color: #2d3748;
+			margin-top: 0.5rem;
+		}
+
+		.card p {
+			font-size: 1.5rem;
+			color: #2d3748;
+		}
+
+		.card .icon {
+			font-size: 2rem;
+			margin-bottom: 0.5rem;
+		}
+	</style>
+
+	<div
+		class="mt-8 mx-4 md:mr-8 rounded-xl bg-white p-4 shadow-sm flex flex-col">
+		<!-- User Info and Debt Summary -->
+		<div class="p-4 sm:p-6 md:p-8 mb-8" style="background: linear-gradient(to right, #2b6cb0, #2d3748)">
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+				<div class="stat-card rounded-lg p-4 sm:p-6 text-white font-semibold text-lg sm:text-xl md:text-2xl flex flex-col justify-between">
+					<div class="flex flex-col justify-center space-y-4">
+						<div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-8">
+							<img src="https://images.unsplash.com/photo-1499714608240-22fc6ad53fb2" alt="User Photo" class="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full">
+							<div class="flex flex-col justify-between h-full pb-4 text-center sm:text-left">
+								<p>Prénom :
+									{{ client.prenom }}</p>
+								<p>Nom :
+									{{ client.nom }}</p>
+								<p>Téléphone :
+									{{ client.telephone }}</p>
+							</div>
+						</div>
+						<p class="email text-center sm:text-left">{{ client.email }}</p>
+					</div>
+				</div>
+				<div class="stat-card rounded-lg p-4 sm:p-6 font-semibold text-white text-lg sm:text-xl md:text-3xl flex flex-col justify-between">
+					<p>Montant Total:
+						{{ montantTotal }}
+						FCFA</p>
+					<p>Montant Verse:
+						{{ montantVerse }}
+						FCFA</p>
+					<p>Montant Restant:
+						{{ montantRestant }}
+						FCFA</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Tabs -->
+		<div class="product-lists">
+			<div class="product-list bg-white rounded-lg shadow p-4 mb-4">
+				<h2 class="font-semibold mb-2">Lister les articles disponibles</h2>
+				<input type="text" placeholder="Libelle" class="p-2 border rounded-lg w-full mb-2">
+				<div class="overflow-x-auto">
+					<table class="w-full">
+						<thead class="bg-blue-600 text-white">
+							<tr>
+								<th class="p-2 text-center">
+									<i class="fas fa-check-square"></i>
+								</th>
+								<th class="p-2">Article</th>
+								<th class="p-2">Prix</th>
+								<th class="p-2">Qte en stock</th>
+							</tr>
+						</thead>
+						<tbody id="article-list">
+							{% for article in articles %}
+								<tr>
+									<td class="p-2 text-center">
+										<input type="checkbox" class="article-checkbox" data-id="{{ article.id }}" data-prix="{{ article.prix }}" data-libelle="{{ article.nomArticle }}">
+									</td>
+									<td class="p-2">{{ article.nomArticle }}</td>
+									<td class="p-2">{{ article.prix }}
+										CFA</td>
+									<td class="p-2">{{ article.quantite }}</td>
+								</tr>
+							{% endfor %}
+
+						</tbody>
+					</table>
+				</div>
+				<div class="flex justify-center mt-4">
+					<button class="px-3 py-1 border rounded mr-1">&lt;</button>
+					<button class="px-3 py-1 border rounded mr-1 bg-blue-500 text-white">1</button>
+					<button class="px-3 py-1 border rounded mr-1">2</button>
+					<button class="px-3 py-1 border rounded">&gt;</button>
+				</div>
+			</div>
+			<div class="product-list bg-white rounded-lg shadow p-4">
+				<div class="flex justify-between items-center mb-4 flex-wrap">
+					<h3 class="text-xl font-bold mb-2 sm:mb-0">Liste de produits selectionné</h3>
+				</div>
+				<div class="mb-4 flex justify-end">
+					<label id="total-price" class="block mb-2 text-lg font-medium">Total: 40.000 FCFA</label>
+				</div>
+				<div class="overflow-x-auto">
+					<table class="w-full">
+						<thead class="bg-blue-600 text-white">
+							<tr>
+								<th class="p-2">ARTICLE</th>
+								<th class="p-2">PRIX</th>
+								<th class="p-2">QUANTITÉ</th>
+								<th class="p-2">MONTANT</th>
+								<th class="p-2">ACTION</th>
+							</tr>
+						</thead>
+						<tbody id="selected-articles">
+							{# <tr>
+								<td class="p-2">Article 1</td>
+								<td class="p-2">2.000</td>
+								<td class="p-2">
+									<div class="flex items-center justify-center">
+										<button class="px-2 py-1 bg-gray-200 rounded-l">-</button>
+										<input type="text" value="1" class="w-12 text-center border-t border-b">
+										<button class="px-2 py-1 bg-gray-200 rounded-r">+</button>
+									</div>
+								</td>
+								<td class="p-2">20.000</td>
+								<td>
+									<button class="text-red-500">
+										<i class="fas fa-trash"></i>
+										Supprimer
+									</button>
+								</td>
+							</tr>
+							<tr>
+								<td class="p-2">Article 2</td>
+								<td class="p-2">3.000</td>
+								<td class="p-2">
+									<div class="flex items-center justify-center">
+										<button class="px-2 py-1 bg-gray-200 rounded-l">-</button>
+										<input type="text" value="1" class="w-12 text-center border-t border-b">
+										<button class="px-2 py-1 bg-gray-200 rounded-r">+</button>
+									</div>
+								</td>
+								<td class="p-2">20.000</td>
+								<td>
+									<button class="text-red-500">
+										<i class="fas fa-trash"></i>
+										Supprimer
+									</button>
+								</td>
+							</tr> #}
+						</tbody>
+					</table>
+				</div>
+				<div class="w-full h-12 flex justify-between mt-4 flex-wrap">
+					<div class="flex justify-center mt-4 mb-2 sm:mb-0">
+						<button class="px-3 py-1 border rounded mr-1">&lt;</button>
+						<button class="px-3 py-1 border rounded mr-1 bg-blue-500 text-white">1</button>
+						<button class="px-3 py-1 border rounded mr-1">2</button>
+						<button class="px-3 py-1 border rounded">&gt;</button>
+					</div>
+					<button id="save-debt" class="bg-blue-500 text-white px-3 rounded mt-2 sm:mt-0">SAVE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const articleCheckboxes = document.querySelectorAll('.article-checkbox');
+        const selectedArticles = document.getElementById('selected-articles');
+        const totalPrice = document.getElementById('total-price');
+
+        let selectedItems = {};
+        let total = 0;
+
+        articleCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const articleId = this.dataset.id;
+                const articlePrix = parseFloat(this.dataset.prix);
+                const articleLibelle = this.dataset.libelle;
+
+                if (this.checked) {
+                    selectedItems[articleId] = { libelle: articleLibelle, prix: articlePrix };
+                    total += articlePrix;
+
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-id', articleId);
+                    row.innerHTML = `
+                        <td class="p-2">${articleLibelle}</td>
+                        <td class="p-2">${articlePrix} CFA</td>
+                        <td class="p-2 text-center">
+                            <button class="text-red-500 remove-btn">Supprimer</button>
+                        </td>
+                    `;
+                    selectedArticles.appendChild(row);
+
+                    row.querySelector('.remove-btn').addEventListener('click', function () {
+                        delete selectedItems[articleId];
+                        total -= articlePrix;
+                        totalPrice.textContent = total;
+                        document.querySelector(`.article-checkbox[data-id="${articleId}"]`).checked = false;
+                        row.remove();
+                    });
+                } else {
+                    delete selectedItems[articleId];
+                    total -= articlePrix;
+                    document.querySelector(`tr[data-id="${articleId}"]`).remove();
+                }
+                totalPrice.textContent = total;
+            });
+        });
+
+        document.getElementById('save-debt').addEventListener('click', () => {
+            console.log('Articles sélectionnés:', selectedItems);
+            console.log('Montant total:', total);
+        });
+    });
+</script>
+{% endblock %}

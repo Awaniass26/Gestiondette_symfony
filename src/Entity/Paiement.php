@@ -22,6 +22,9 @@ class Paiement
     #[ORM\ManyToOne(inversedBy: 'paiements')]
     private ?Dette $dette = null;
 
+    #[ORM\ManyToOne(inversedBy: 'paiements')]
+    private ?Client $client = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +62,18 @@ class Paiement
     public function setDette(?Dette $dette): static
     {
         $this->dette = $dette;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): static
+    {
+        $this->client = $client;
 
         return $this;
     }

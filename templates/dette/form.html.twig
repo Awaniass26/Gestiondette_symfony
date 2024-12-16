@@ -79,7 +79,7 @@
 				<h2 class="text-2xl font-bold mb-6 text-blue-800">
 					<i class="fas fa-user-plus mr-2"></i>Nouveau Client</h2>
 
-				<form id="search-form" method="POST" action="{{ path('app_client') }}" enctype="multipart/form-data" class="space-y-4">
+				<form id="search-form" method="POST" action="{{ path('app_dette') }}" enctype="multipart/form-data" class="space-y-4">
 					<div class="form-row mb-4 flex items-center ">
 						<label for="prenom" class="w-full sm:w-1/6 flex-shrink-0 font-semibold text-gray-700 flex items-center mr-12">
 							<i class="fas fa-user mr-2"></i>Prénom</label>
@@ -172,11 +172,14 @@
 							</button>
 						</a>
 					{% endif %}
-					<a href="../Boutiquier/nouvelleDette.html" class="flex">
+					{% if client and client.id %}
+					<a href="{{ path('app_nouvelle_dette', { 'client_id': client.id }) }}" class="flex">
 						<button class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex items-center">
 							<i class="fas fa-plus mr-2"></i>Nouvelle
 						</button>
 					</a>
+					{% endif %}
+
 				</div>
 				<!-- Résultats de la recherche -->
 				<div

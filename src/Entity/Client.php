@@ -15,7 +15,7 @@ class Client
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 30)]
+    #[ORM\Column(length: 30, unique:true)]
     private ?string $telephone = null;
 
     #[ORM\OneToOne(inversedBy: 'client', cascade: ['persist', 'remove'])]
@@ -51,10 +51,17 @@ class Client
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
+    /**
+     * @var Collection<int, Paiement>
+     */
+    #[ORM\OneToMany(targetEntity: Paiement::class, mappedBy: 'client')]
+    private Collection $paiements;
+
     public function __construct()
     {
         $this->dettes = new ArrayCollection();
         $this->demandes = new ArrayCollection();
+        $this->paiements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -214,6 +221,36 @@ class Client
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Paiement>
+     */
+    public function getPaiements(): Collection
+    {
+        return $this->paiements;
+    }
+
+    public function addPaiement(Paiement $paiement): static
+    {
+        if (!$this->paiements->contains($paiement)) {
+            $this->paiements->add($paiement);
+            $paiement->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removePaiement(Paiement $paiement): static
+    {
+        if ($this->paiements->removeElement($paiement)) {
+            // set the owning side to null (unless already changed)
+            if ($paiement->getClient() === $this) {
+                $paiement->setClient(null);
+            }
+        }
 
         return $this;
     }

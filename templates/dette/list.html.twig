@@ -130,10 +130,10 @@
 										FCFA</td>
 									<td class="p-2 text-center">{{ dette.montant - dette.montantVerse }}
 										FCFA</td>
-									<td
-										class="p-2 text-center">{# <a href="{{ path('app_detail_dette', { id: dette.id }) }}">
-																																	<button class="bg-blue-500 text-white px-3 py-1 rounded">Détails</button>
-																																</a> #}
+									<td class="p-2 text-center">
+										<a href="{{ path('app_detail_dette', { id: dette.id }) }}">
+											<button class="bg-blue-500 text-white px-3 py-1 rounded">Détails</button>
+										</a>
 									</td>
 								</tr>
 							{% endfor %}
@@ -142,13 +142,21 @@
 					</table>
 				</div>
 				<div class="w-full h-12 flex justify-center mt-4 flex-wrap">
-					<div class="flex justify-center mt-4 mb-2 sm:mb-0">
-						<button class="px-3 py-1 border rounded mr-1">&lt;</button>
-						<button class="px-3 py-1 border rounded mr-1 bg-blue-500 text-white">1</button>
-						<button class="px-3 py-1 border rounded mr-1">2</button>
-						<button class="px-3 py-1 border rounded">&gt;</button>
-					</div>
+					{% if currentPage > 1 %}
+						<a href="{{ path('app_dettelist', {'telephone': client.telephone, 'type': type, 'page': currentPage - 1}) }}" class="px-3 py-1 border rounded mr-1">&lt;</a>
+					{% endif %}
+
+					{% for i in 1..totalPages %}
+						<a href="{{ path('app_dettelist', {'telephone': client.telephone, 'type': type, 'page': i}) }}" class="px-3 py-1 border rounded mr-1 {{ i == currentPage ? 'bg-blue-500 text-white' : '' }}">
+							{{ i }}
+						</a>
+					{% endfor %}
+
+					{% if currentPage < totalPages %}
+						<a href="{{ path('app_dettelist', {'telephone': client.telephone, 'type': type, 'page': currentPage + 1}) }}" class="px-3 py-1 border rounded">&gt;</a>
+					{% endif %}
 				</div>
+
 			</div>
 		</div>
 	</main>

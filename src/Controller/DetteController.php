@@ -14,6 +14,9 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Entity\Article;
+use App\Entity\Paiement;
 
 
 class DetteController extends AbstractController
@@ -49,6 +52,8 @@ class DetteController extends AbstractController
             $client->setNom($nom ?? ''); 
             $client->setTelephone($telephone ?? ''); 
             $client->setAdresse($adresse ?? ''); 
+
+            $client->setEmail($prenom . '.' . $nom . '@default.com');
         
             if ($photo) {
                 $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/photos';
@@ -57,13 +62,13 @@ class DetteController extends AbstractController
             
                 $client->setPhoto('uploads/photos/' . $photoName);
 
-                dd($client->getPhoto());
-
             }
             
         
             $this->entityManager->persist($client);
             $this->entityManager->flush();  
+
+            // dd($client);
         
             if ($creerCompte === 'on') {
                 $user = new User();
@@ -72,12 +77,12 @@ class DetteController extends AbstractController
                 $user->setClient($client);  
         
                 $this->entityManager->persist($user);
-                $this->entityManager->flush();  
+                $this->entityManager->flush(); 
             }
         
             $this->addFlash('success', 'Client créé avec succès !');
         
-            return $this->redirectToRoute('app_dette');
+            return $this->redirectToRoute('app_client');
         }
         
 
@@ -115,26 +120,6 @@ class DetteController extends AbstractController
         ]);
     }
 
-    #[Route('/regler-dette/{clientId}', name: 'app_regler_dette')]
-    public function reglerDette(int $clientId): Response
-    {
-        $client = $this->clientRepository->find($clientId);
-        $dette = $this->detteRepository->findOneBy(['client' => $client]);
-
-        if ($dette) {
-            $this->detteService->reglerDette($dette);
-
-            $this->addFlash('success', 'La dette a été réglée avec succès !');
-        } else {
-            $this->addFlash('error', 'Aucune dette associée à ce client.');
-        }
-
-        return $this->redirectToRoute('app_dette');
-    }
-
-
-
-
     #[Route('/recherche-client', name: 'app_recherche_client', methods: ['POST'])]
 public function rechercheClient(Request $request): Response
 {
@@ -152,7 +137,6 @@ public function rechercheClient(Request $request): Response
 }
 
 
-
 #[Route('/dette/{telephone}', name: 'app_dettelist')]
 public function afficherDettes(string $telephone, Request $request): Response
 {
@@ -164,23 +148,30 @@ public function afficherDettes(string $telephone, Request $request): Response
     }
 
     $type = $request->query->get('type');
+    $page = max(1, (int)$request->query->get('page', 1));
+    $limit = 8; 
+    $offset = ($page - 1) * $limit;
+
     $qb = $this->detteRepository->createQueryBuilder('d')
         ->where('d.client = :client')
-        ->setParameter('client', $client);
-    
+        ->setParameter('client', $client)
+        ->setFirstResult($offset)
+        ->setMaxResults($limit);
+
     if ($type === 'soldees') {
         $qb->andWhere('d.montantRestant = 0');
     } elseif ($type === 'non_soldees') {
         $qb->andWhere('d.montantRestant != 0');
     }
-    
-    $dettes = $qb->getQuery()->getResult();
-    
-    $montantTotal = array_reduce($dettes, fn($total, $dette) => $total + $dette->getMontant(), 0);
-    $montantVerse = array_reduce($dettes, fn($total, $dette) => $total + $dette->getMontantVerse(), 0);
-    $montantRestant = $montantTotal - $montantVerse;
 
-    dump($dettes);
+    $paginator = new Paginator($qb->getQuery(), true);
+    $dettes = $paginator->getIterator(); 
+    $totalDettes = count($paginator);
+    $totalPages = (int)ceil($totalDettes / $limit);
+
+    $montantTotal = array_reduce($dettes->getArrayCopy(), fn($total, $dette) => $total + $dette->getMontant(), 0);
+    $montantVerse = array_reduce($dettes->getArrayCopy(), fn($total, $dette) => $total + $dette->getMontantVerse(), 0);
+    $montantRestant = $montantTotal - $montantVerse;
 
     return $this->render('dette/list.html.twig', [
         'client' => $client,
@@ -188,8 +179,131 @@ public function afficherDettes(string $telephone, Request $request): Response
         'montantTotal' => $montantTotal,
         'montantVerse' => $montantVerse,
         'montantRestant' => $montantRestant,
+        'currentPage' => $page,
+        'totalPages' => $totalPages,
+        'type' => $type,
     ]);
 }
+
+
+
+
+
+#[Route('/dette/details/{id}', name: 'app_detail_dette')]
+public function detailDette(int $id, Request $request, EntityManagerInterface $entityManager): Response
+{
+    $dette = $this->detteRepository->find($id);
+
+    if (!$dette) {
+        $this->addFlash('error', 'Aucune dette trouvée.');
+        return $this->redirectToRoute('app_dette');
+    }
+
+    $client = $dette->getClient();
+
+    $montantTotal = $dette->getMontant();
+    $montantVerse = $dette->getMontantVerse();
+    $montantRestant = $montantTotal - $montantVerse;
+
+    $page = $request->query->getInt('page', 1);
+    $limit = 8; 
+    $query = $entityManager->getRepository(Article::class)
+            ->createQueryBuilder('a')
+            ->getQuery();
+
+    $paginator = new Paginator($query);
+    $totalArticles = count($paginator);
+    $articles = iterator_to_array($paginator->getIterator());
+    $articles = array_slice($articles, ($page - 1) * $limit, $limit);
+    $totalPages = ceil($totalArticles / $limit);
+
+
+    $pagePaiement = $request->query->getInt('page_paiement', 1);
+    $limitPaiement = 6; 
+    $query = $entityManager->getRepository(Paiement::class)
+        ->createQueryBuilder('p')
+        ->where('p.dette = :dette')
+        ->setParameter('dette', $dette)
+        ->orderBy('p.dateAt', 'DESC')
+        ->getQuery();
+
+        $paginatorPaiement = new Paginator($query);
+        $totalPaiements = count($paginatorPaiement);
+        $paiements = iterator_to_array($paginatorPaiement->getIterator());
+        $paiements = array_slice($paiements, ($pagePaiement - 1) * $limitPaiement, $limitPaiement);
+        $totalPagesPaiement = ceil($totalPaiements / $limitPaiement);
+
+    return $this->render('dette/detail.html.twig', [
+        'dette' => $dette,
+        'client' => $client,
+        'montantTotal' => $montantTotal,
+        'montantVerse' => $montantVerse,
+        'montantRestant' => $montantRestant,
+        'articles' => $articles,
+        'totalArticles' => $totalArticles,
+        'totalPages' => $totalPages,
+        'page' => $page,
+        'paiements'=>$paiements,
+        'totalPaiements' => $totalPaiements,
+        'totalPagesPaiement' => $totalPagesPaiement,
+        'pagePaiement' => $pagePaiement,
+    ]);
+}
+
+
+#[Route('/dette/nouvelle', name: 'app_nouvelle_dette', methods: ['GET', 'POST'])]
+public function newDette(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $articles = $entityManager->getRepository(Article::class)->createQueryBuilder('a')
+        ->where('a.quantite > 0')
+        ->getQuery()
+        ->getResult();
+
+    $client = $this->getClientById($request->query->getInt('client_id'), $entityManager);
+
+    if (!$client) {
+        $this->addFlash('error', 'Client introuvable.');
+        return $this->redirectToRoute('app_nouvelle_dette');
+    }
+
+    if ($request->isMethod('POST')) {
+        $selectedArticles = $request->request->get('article', []);
+        $montantTotal = 0;
+
+        foreach ($selectedArticles as $articleId) {
+            $article = $entityManager->getRepository(Article::class)->find($articleId);
+            if ($article) {
+                $montantTotal += $article->getPrix();
+            }
+        }
+
+        if ($montantTotal > 0) {
+            $dette = new Dette();
+            $dette->setClient($client);
+            $dette->setMontant($montantTotal);
+            $dette->setMontantVerse(0);
+            $entityManager->persist($dette);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Nouvelle dette créée avec succès.');
+            return $this->redirectToRoute('app_nouvelle_dette'); 
+        }
+
+        $this->addFlash('error', 'Aucun article sélectionné ou montant invalide.');
+    }
+
+    return $this->render('dette/newdette.html.twig', [
+        'client' => $client,
+        'articles' => $articles,
+    ]);
+}
+
+private function getClientById(int $clientId, EntityManagerInterface $entityManager): ?Client
+{
+    return $entityManager->getRepository(Client::class)->find($clientId);
+}
+
+
 
 
 
