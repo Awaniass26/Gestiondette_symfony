@@ -34,7 +34,7 @@ class DetteController extends AbstractController
         $this->detteRepository = $detteRepository;
     }
 
-    #[Route('/dette', name: 'app_dette',methods: ['GET', 'POST']) ]
+    #[Route('/boutiquier/dette', name: 'app_dette',methods: ['GET', 'POST']) ]
     public function index(Request $request): Response
     {
         if ($request->isMethod('POST')) {
@@ -120,7 +120,7 @@ class DetteController extends AbstractController
         ]);
     }
 
-    #[Route('/recherche-client', name: 'app_recherche_client', methods: ['POST'])]
+    #[Route('/boutiquier/recherche-client', name: 'app_recherche_client', methods: ['POST'])]
 public function rechercheClient(Request $request): Response
 {
     $telephone = $request->request->get('telephone');
@@ -137,7 +137,7 @@ public function rechercheClient(Request $request): Response
 }
 
 
-#[Route('/dette/{telephone}', name: 'app_dettelist')]
+#[Route('/client/dette/{telephone}', name: 'app_dettelist')]
 public function afficherDettes(string $telephone, Request $request): Response
 {
     $client = $this->clientRepository->findOneBy(['telephone' => $telephone]);
@@ -189,7 +189,7 @@ public function afficherDettes(string $telephone, Request $request): Response
 
 
 
-#[Route('/dette/details/{id}', name: 'app_detail_dette')]
+#[Route('client/dette/details/{id}', name: 'app_detail_dette')]
 public function detailDette(int $id, Request $request, EntityManagerInterface $entityManager): Response
 {
     $dette = $this->detteRepository->find($id);
@@ -251,7 +251,7 @@ public function detailDette(int $id, Request $request, EntityManagerInterface $e
 }
 
 
-#[Route('/dette/nouvelle', name: 'app_nouvelle_dette', methods: ['GET', 'POST'])]
+#[Route('/boutiquier/dette/nouvelle', name: 'app_nouvelle_dette', methods: ['GET', 'POST'])]
 public function newDette(Request $request, EntityManagerInterface $entityManager): Response
 {
     $articles = $entityManager->getRepository(Article::class)->createQueryBuilder('a')

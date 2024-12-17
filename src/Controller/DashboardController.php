@@ -11,7 +11,7 @@ use App\Repository\ArticleRepository;
 
 class DashboardController extends AbstractController
 {
-    #[Route('/dashboard', name: 'app_dashboard')]
+    #[Route('/admin/dashboard', name: 'app_dashboard')]
     public function index(ClientRepository $clientRepository, ArticleRepository $articleRepository, Request $request): Response
     {
         $pageClients = $request->query->getInt('page_clients', 1);

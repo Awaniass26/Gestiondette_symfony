@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\User;
 use App\Entity\Client;
 use App\Entity\Article;
 use App\Entity\Dette;
@@ -76,9 +77,9 @@ for ($i = 1; $i <= 15; $i++) {
 
             $manager->persist($client);
             $this->addReference('client_' . $i, $client);
-        }
+         }
 
-        $manager->flush();  
+            $manager->flush();  
 
 
             for ($j = 0; $j < 10; $j++) {
@@ -166,9 +167,31 @@ for ($i = 1; $i <= 15; $i++) {
     
                     $manager->persist($demandeArticle);
                 }
-            
-        }
 
-        $manager->flush(); 
+            } 
+                
+                
+                $roles = ['Client', 'Admin', 'Boutiquier'];
+
+                foreach ($roles as $role) {
+                    for ($i = 1; $i <= 8; $i++) {
+                        $user = new User();
+                        $user->setNom('Nom' . $role . $i);
+                        $user->setPrenom('Prenom' . $role . $i);
+        
+                        $user->setLogin(strtolower($role) . $i . uniqid() . '@exemple.com');
+                        $user->setTelephone('77' . str_pad($i, 7, '0', STR_PAD_LEFT));
+                        $user->setRoles([$role]);
+                        $user->setPassword(password_hash('password', PASSWORD_BCRYPT));
+        
+                        $manager->persist($user);
+                    }
+                }
+        
+                $manager->flush();
+                           
     }
+
+
+
 }

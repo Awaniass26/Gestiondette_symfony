@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ArticleController extends AbstractController
 {
-    #[Route('/article/{filter}', name: 'app_article', defaults: ['filter' => 'all'])]
+    #[Route('/boutiquier/article/{filter}', name: 'app_article', defaults: ['filter' => 'all'])]
     public function index(ArticleRepository $articleRepository, Request $request, string $filter): Response
     {
         $search = $request->query->get('search', ''); 

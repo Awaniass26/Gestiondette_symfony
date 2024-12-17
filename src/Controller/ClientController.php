@@ -17,7 +17,7 @@ class ClientController extends AbstractController
         $this->clientRepository = $clientRepository;
     }
 
-    #[Route('/client', name: 'app_client')]
+    #[Route('/boutiquier/client', name: 'app_client')]
 public function list(Request $request): Response
 {
     $phone = $request->query->get('phone', ''); 

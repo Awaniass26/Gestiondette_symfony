@@ -14,7 +14,7 @@ use App\Entity\DemandeArticle;
 
 class DemandeController extends AbstractController
 {
-    #[Route('/demande', name: 'app_demande')]
+    #[Route('/boutiquier/demande', name: 'app_demande')]
 public function index(Request $request, EntityManagerInterface $entityManager): Response
 {
     $status = $request->query->get('status', 'En cours'); 
@@ -45,7 +45,7 @@ public function index(Request $request, EntityManagerInterface $entityManager): 
 }
 
 
-#[Route('/detaildemande/{id}', name: 'app_demande_detail')]
+#[Route('/boutiquier/detaildemande/{id}', name: 'app_demande_detail')]
 public function details(int $id, EntityManagerInterface $entityManager,Request $request): Response
 {
     $demande = $entityManager->getRepository(Demande::class)->find($id);
