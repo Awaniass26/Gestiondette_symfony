@@ -44,6 +44,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 35,unique:true)]
     private ?string $telephone = null;
 
+    #[ORM\Column(length: 39)]
+    private ?string $adresse = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -173,6 +176,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelephone(string $telephone): static
     {
         $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getAdresse(): ?string
+    {
+        return $this->adresse;
+    }
+
+    public function setAdresse(string $adresse): static
+    {
+        $this->adresse = $adresse;
 
         return $this;
     }

@@ -18,7 +18,7 @@
 					<button class="bg-white border border-gray-300 px-3 py-1 rounded" onclick="filterTable('Boutiquier')">Boutiquier</button>
 					<button class="bg-white border border-gray-300 px-3 py-1 rounded" onclick="filterTable('Client')">Client</button>
 				</div>
-				<button data-modal-target="userModal" data-modal-toggle="userModal" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 sm:mt-0">NOUVEAU</button>
+				<button data-modal-target="userModal" data-modal-toggle="userModal" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 sm:mt-0" onclick="openModal('create')">NOUVEAU</button>
 			</div>
 			<!-- Table responsive -->
 			<div class="overflow-x-auto">
@@ -34,7 +34,7 @@
 					</thead>
 					<tbody class="text-gray-700" id="user-table-body">
 						{% for user in users %}
-							<tr data-role="{{ user.roles[0]|replace({'ROLE_': ''})|capitalize }}">
+							<tr data-id="{{ user.id }}" data-role="{{ user.roles[0]|replace({'ROLE_': ''})|capitalize }}">
 								<td class="py-2 px-4 text-center">
 									{% for role in user.roles %}
 										{% if role != 'ROLE_USER' %}
@@ -47,10 +47,7 @@
 								<td class="py-2 px-4 text-center">{{ user.login }}</td>
 								<td class="py-2 px-4 text-center">{{ user.telephone }}</td>
 								<td class="border-t border-gray-200 py-2 px-4 text-center mt-2 sm:mt-0">
-									<button data-modal-target="compteModal" data-modal-toggle="compteModal" title="CREATION COMPTE" class="bg-blue-500 text-white py-1 px-4 rounded">
-										<i class="fas fa-user-plus mr-2"></i>
-									</button>
-									<button data-modal-target="userModal" data-modal-toggle="userModal" title="MODIFIER" class="bg-blue-500 text-white px-3 py-1 rounded">
+									<button class="bg-blue-500 text-white px-3 py-1 rounded" onclick="openModal('edit', {{ user.id }})" title="MODIFIER">
 										<i class="fas fa-edit"></i>
 									</button>
 								</td>
@@ -79,50 +76,7 @@
 			</div>
 		</div>
 	</main>
-</div></div><!-- Modal --><div id="compteModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 w-full p-4 hidden overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-<div class="relative w-full max-w-md max-h-full">
-	<div class="relative bg-white shadow-lg pt-10 px-6 pb-6 rounded-xl">
-		<button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="compteModal">
-			<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-				<path fill-rule="evenodd" d="M10 8.586L15.707 2.879a1 1 0 111.414 1.414L11.414 10l5.707 5.707a1 1 0 01-1.414 1.414L10 11.414l-5.707 5.707a1 1 0 01-1.414-1.414L8.586 10 2.879 4.293a1 1 0 111.414-1.414L10 8.586z" clip-rule="evenodd"></path>
-			</svg>
-		</button>
-		<h3 class="text-2xl font-semibold text-gray-900 mb-4">COMPTE</h3>
-		<div class="p-6 text-center border border-gray-200 rounded-2xl">
-			<div class="flex justify-start gap-4 mb-6">
-				<img src="https://images.unsplash.com/photo-1499714608240-22fc6ad53fb2" alt="User Image" class="w-40 h-40 object-cover rounded-lg">
-				<div class="text-left flex flex-col justify-between h-40 space-y-1">
-					<p class="text-gray-700">
-						<span class="font-semibold">Prénom:</span>
-						ousseynou</p>
-					<p class="text-gray-700">
-						<span class="font-semibold">Nom:</span>
-						diedhiou</p>
-					<p class="text-gray-700">
-						<span class="font-semibold">Tel:</span>
-						785304869</p>
-					<p class="text-gray-700">
-						<span class="font-semibold">Adresse:</span>
-						Keur Massar</p>
-				</div>
-			</div>
-			<form class="mt-8 space-y-4">
-				<div>
-					<label for="login" class="block text-left font-medium text-gray-700">Login</label>
-					<input type="text" name="login" id="login" placeholder="Login" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-				</div>
-				<div>
-					<label for="password" class="block text-left font-medium text-gray-700">Password</label>
-					<input type="password" name="password" id="password" placeholder="Password" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-				</div>
-			</form>
-			<div class="flex justify-between mt-8">
-				<button data-modal-hide="compteModal" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition duration-200">ANNULER</button>
-				<button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200">ENREGISTRER</button>
-			</div>
-		</div>
-	</div>
-</div></div><div id="userModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full">
+</div></div><!-- Modal --><div id="userModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full">
 <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
 	<div class="relative bg-white rounded-lg shadow pt-10 px-4 pb-4 w-full max-w-md mx-auto">
 		<button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="userModal">
@@ -132,40 +86,147 @@
 		</button>
 		<h3 class="mb-4 text-lg font-normal text-gray-500">N. UTILISATEUR</h3>
 		<div class="p-6 text-center border rounded-xl">
-			<form class="space-y-4">
-				<input type="text" name="Prenom" placeholder="Prenom" id="prenom" class="border border-gray-300 p-2 w-full rounded-lg"/>
-				<input type="text" name="Nom" placeholder="Nom" id="nom" class="border border-gray-300 p-2 w-full rounded-lg"/>
-				<input type="text" name="Tel" placeholder="Tel" id="tel" class="border border-gray-300 p-2 w-full rounded-lg"/>
-				<input type="text" name="Adresse" placeholder="Adresse" id="adresse" class="border border-gray-300 p-2 w-full rounded-lg"/>
-				<input type="text" name="Login" placeholder="Login" id="login" class="border border-gray-300 p-2 w-full rounded-lg"/>
-				<input type="password" name="Password" placeholder="Password" id="password" class="border border-gray-300 p-2 w-full rounded-lg"/>
+
+<form method="POST" class="space-y-4" action="{{ path(isEdit ? 'app_edit_user' : 'app_create_user', { id: user.id }) }}">
+				{# <pre>{{ dump(isEdit) }}</pre> #}
+				<input type="text" name="Prenom" placeholder="Prenom" id="prenom" value="{{ user.prenom }}" class="border border-gray-300 p-2 w-full rounded-lg"/>
+				<input type="text" name="Nom" placeholder="Nom" id="nom" value="{{ user.nom }}" class="border border-gray-300 p-2 w-full rounded-lg"/>
+				<input type="text" name="Tel" placeholder="Tel" id="tel" value="{{ user.telephone }}" class="border border-gray-300 p-2 w-full rounded-lg"/>
+				<input type="text" name="Adresse" placeholder="Adresse" id="adresse" value="{{ user.adresse }}" class="border border-gray-300 p-2 w-full rounded-lg"/>
+				<input type="text" name="Login" placeholder="Login" id="login" value="{{ user.login }}" class="border border-gray-300 p-2 w-full rounded-lg"/>
+				<input type="password" name="Password" placeholder="Password" id="password" value="{{ user.password }}" class="border border-gray-300 p-2 w-full rounded-lg"/>
 				<div class="flex items-center">
 					<input id="fileInput" name="fileInput" type="file" class="border border-gray-300 w-full rounded-r-lg pl-2"/>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2" name="role">
-					<button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex-grow">Admin</button>
-					<button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex-grow">Boutiquier</button>
-					<button type="button" class="bg-blue-600 text-white px-4 py-2 rounded flex-grow">Clients</button>
+				<div class="flex flex-wrap justify-between gap-2" id="role">
+					<button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex-grow" onclick="selectRole('Admin')">Admin</button>
+					<button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded flex-grow" onclick="selectRole('Boutiquier')">Boutiquier</button>
+					<button type="button" class="bg-blue-600 text-white px-4 py-2 rounded flex-grow" onclick="selectRole('Client')">Client</button>
 				</div>
+				<input type="hidden" name="role" id="roleInput" value="{{ user.roles[0] ?? '' }}"/>
+
+
 				<div class="flex justify-between">
-					<button type="button" class="bg-red-500 text-white px-4 py-2 rounded">ANNULER</button>
-					<button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">ENREGISTRER</button>
+					<button type="button" class="bg-red-500 text-white px-4 py-2 rounded" onclick="closeModal()">ANNULER</button>
+					<button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">{{ isEdit ? 'MODIFIER' : 'ENREGISTRER' }}</button>
 				</div>
 			</form>
 		</div>
 	</div>
 </div></div><script>
-function filterTable(role) { // Récupérer toutes les lignes du tableau
-const rows = document.querySelectorAll('#user-table-body tr');
+const modal = document.getElementById('userModal');
+if (modal) {
+function openModal(action, userId = null) {
+const overlay = document.querySelector('.modal-overlay');
+const form = modal.querySelector('form');
 
-rows.forEach(row => { // Récupérer le rôle de la ligne
-const rowRole = row.getAttribute('data-role');
+if (action === 'create') {
+form.setAttribute('action', '{{ path('app_create_user') }}'); // URL pour la création
+document.getElementById('prenom').value = '';
+document.getElementById('nom').value = '';
+document.getElementById('tel').value = '';
+document.getElementById('adresse').value = '';
+document.getElementById('login').value = '';
+document.getElementById('password').value = '';
+document.getElementById('roleInput').value = '';
+} else if (action === 'edit' && userId !== null) { // Charger les données de l'utilisateur
+fetch (`/admin/user/${userId}/edit`).then(response => response.json()).then(data => {
+if (data.success) {
+document.getElementById('prenom').value = data.user.prenom;
+document.getElementById('nom').value = data.user.nom;
+document.getElementById('tel').value = data.user.tel;
+document.getElementById('adresse').value = data.user.adresse;
+document.getElementById('login').value = data.user.login;
+document.getElementById('password').value = data.user.password;
+document.getElementById('roleInput').value = data.user.role;
+form.setAttribute('action', `/admin/user/${userId}/edit`); // URL pour la modification
+}
+});
+}
+modal.classList.remove('hidden'); // Afficher le modal
+overlay.classList.remove('hidden'); // Afficher l'overlay
+}
 
-// Montrer ou cacher la ligne en fonction du filtre
-if (role === 'ALL' || rowRole === role) {
-row.style.display = ''; // Montrer la ligne
+
+function closeModal() {
+const modal = document.getElementById('userModal');
+const overlay = document.querySelector('.overlay');
+modal.classList.add('hidden');
+if (overlay) {
+overlay.classList.add('hidden');
+}
+}
 } else {
-row.style.display = 'none'; // Cacher la ligne
+console.error('Modal not found');
+}
+
+const form = modal ? modal.querySelector('form') : null;
+if (form) {
+function submitForm(event) {
+event.preventDefault();
+
+const formData = new FormData(document.getElementById('userForm'));
+const newUser = {
+prenom: formData.get('Prenom'),
+nom: formData.get('Nom'),
+tel: formData.get('Tel'),
+adresse: formData.get('Adresse'),
+login: formData.get('Login'),
+password: formData.get('Password'),
+role: formData.get('role'),
+fileInput: formData.get('fileInput')
+};
+
+const tableBody = document.getElementById('user-table-body');
+const newRow = document.createElement('tr');
+newRow.innerHTML = `
+        <td class="py-2 px-4 text-center">${
+newUser.role
+}</td>
+        <td class="py-2 px-4 text-center">${
+newUser.prenom
+} ${
+newUser.nom
+}</td>
+        <td class="py-2 px-4 text-center">${
+newUser.login
+}</td>
+        <td class="py-2 px-4 text-center">${
+newUser.tel
+}</td>
+        <td class="border-t border-gray-200 py-2 px-4 text-center">
+            <button class="bg-blue-500 text-white px-3 py-1 rounded" onclick="openModal('edit')">Modifier</button>
+        </td>
+    `;
+tableBody.appendChild(newRow);
+
+closeModal();
+}
+} else {
+console.error('Form not found');
+
+
+function selectRole(role) { // Mettre à jour la valeur du champ caché 'role' avec la sélection
+document.getElementById('roleInput').value = role;
+
+// Mettre à jour l'apparence des boutons pour montrer quel rôle est sélectionné
+const buttons = document.querySelectorAll('#role button');
+buttons.forEach(button => button.classList.remove('bg-blue-600', 'text-white', 'bg-gray-300', 'text-gray-700'));
+
+// Highlight selected button
+const selectedButton = Array.from(buttons).find(button => button.innerText === role);
+selectedButton.classList.add('bg-blue-600', 'text-white');
+}
+}
+
+
+function filterTable(role) {
+const rows = document.querySelectorAll('tbody tr');
+rows.forEach(row => {
+if (role === 'ALL' || row.getAttribute('data-role') === role) {
+row.style.display = '';
+} else {
+row.style.display = 'none';
 }
 });
 }</script>{% endblock %}

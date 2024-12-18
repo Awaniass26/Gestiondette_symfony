@@ -81,67 +81,91 @@ for ($i = 1; $i <= 15; $i++) {
 
             $manager->flush();  
 
+            for ($i = 1; $i <= 10; $i++) {
+                $client = $this->getReference('client_' . $i);
+    
+                $user = new User();
+                $user->setNom($client->getNom());
+                $user->setPrenom($client->getPrenom());
+                $user->setLogin(strtolower($client->getPrenom()) . '.' . strtolower($client->getNom()) . $i . '@exemple.com');
+                $user->setTelephone($client->getTelephone());
+                $user->setRoles(['ROLE_CLIENT']);
+                $user->setPassword(password_hash('password', PASSWORD_BCRYPT));
+    
+                $manager->persist($user);
+                $client->setCompte($user);
+            }
+    
+            $manager->flush(); 
 
-            for ($j = 0; $j < 10; $j++) {
 
-                $detteNonSoldee = new Dette();
-                $detteNonSoldee->setDateAt(new \DateTimeImmutable());
-                $montantDette = rand(1000, 100000);
-                $detteNonSoldee->setMontant($montantDette);
-                $montantVerse = rand(0, $montantDette - 1);
-                $detteNonSoldee->setMontantVerse($montantVerse);
-                $detteNonSoldee->setMontantRestant($montantDette - $montantVerse);
-
-                $detteNonSoldee->setClient($client);
-
-                $nombreArticles = rand(1, 20); 
-                for ($k = 0; $k < $nombreArticles; $k++) {
-                    $article = $articlesDisponibles[array_rand($articlesDisponibles)];
-                    $quantite = rand(1, 5);
-                
-                    $detteArticle = new DetteArticle();
-                    $detteArticle->setDette($detteNonSoldee);
-                    $detteArticle->setArticle($article);
-                    $detteArticle->setQuantite($quantite);
-                
-                    $manager->persist($detteArticle);
-                }               
+            for ($i = 1; $i <= 20; $i++) { // Pour chaque client
+                $client = $this->getReference('client_' . $i);
+            
+                // 8 dettes non soldées
+                for ($j = 0; $j < 8; $j++) {
+                    $detteNonSoldee = new Dette();
+                    $detteNonSoldee->setDateAt(new \DateTimeImmutable());
+            
+                    // Définir les montants
+                    $montantTotal = rand(1000, 100000);
+                    $montantVerse = rand(0, $montantTotal - 1);
+                    $detteNonSoldee->setMontant($montantTotal);
+                    $detteNonSoldee->setMontantVerse($montantVerse);
+                    $detteNonSoldee->setMontantRestant($montantTotal - $montantVerse);
+            
+                    // Associer le client
+                    $detteNonSoldee->setClient($client);
+            
+                    // Ajouter des articles à la dette
+                    $nombreArticles = rand(1, 5);
+                    for ($k = 0; $k < $nombreArticles; $k++) {
+                        $article = $articlesDisponibles[array_rand($articlesDisponibles)];
+                        $quantite = rand(1, 5);
+            
+                        $detteArticle = new DetteArticle();
+                        $detteArticle->setDette($detteNonSoldee);
+                        $detteArticle->setArticle($article);
+                        $detteArticle->setQuantite($quantite);
+            
+                        $manager->persist($detteArticle);
+                    }
+            
                     $manager->persist($detteNonSoldee);
-
-                for ($k = 1; $k <= 10; $k++) {
-                    $paiementNonSoldee = new Paiement();
-                    $paiementNonSoldee->setDateAt(new \DateTimeImmutable());
-                    $montantPaiement = rand(100, $detteNonSoldee->getMontantRestant());
-                    $paiementNonSoldee->setMontant($montantPaiement);
-                    $paiementNonSoldee->setDette($detteNonSoldee);
-                    $manager->persist($paiementNonSoldee);
+                }
+            
+                // 4 dettes soldées
+                for ($j = 0; $j < 4; $j++) {
+                    $detteSoldee = new Dette();
+                    $detteSoldee->setDateAt(new \DateTimeImmutable());
+            
+                    // Montant soldé
+                    $montantTotal = rand(1000, 100000);
+                    $detteSoldee->setMontant($montantTotal);
+                    $detteSoldee->setMontantVerse($montantTotal);
+                    $detteSoldee->setMontantRestant(0);
+            
+                    // Associer le client
+                    $detteSoldee->setClient($client);
+            
+                    // Ajouter des articles à la dette
+                    $nombreArticles = rand(1, 5);
+                    for ($k = 0; $k < $nombreArticles; $k++) {
+                        $article = $articlesDisponibles[array_rand($articlesDisponibles)];
+                        $quantite = rand(1, 5);
+            
+                        $detteArticle = new DetteArticle();
+                        $detteArticle->setDette($detteSoldee);
+                        $detteArticle->setArticle($article);
+                        $detteArticle->setQuantite($quantite);
+            
+                        $manager->persist($detteArticle);
+                    }
+            
+                    $manager->persist($detteSoldee);
                 }
             }
-
-            for ($j = 10; $j < 20; $j++) {
-                $detteSoldee = new Dette();
-                $detteSoldee->setDateAt(new \DateTimeImmutable());
-                $montantTotal = rand(1000, 100000);
-                $detteSoldee->setMontant($montantTotal);
-                $detteSoldee->setMontantVerse($montantTotal); 
-                $detteSoldee->setMontantRestant(0); 
-                $detteSoldee->setClient($client);
-
-                $article = $articlesDisponibles[array_rand($articlesDisponibles)];
-                $detteSoldee->setArticle($article);
-
-                $manager->persist($detteSoldee);
-
-                for ($k = 0; $k < 10; $k++) {
-                    $paiement = new Paiement();
-                    $paiement->setDateAt(new \DateTimeImmutable());
-                    $montantPaiement = $montantTotal / 3; 
-                    $paiement->setMontant($montantPaiement);
-                    $paiement->setDette($detteSoldee);
-
-                    $manager->persist($paiement);
-                }
-            }
+            
 
 
             for ($j = 0; $j < 28; $j++) {
@@ -171,17 +195,17 @@ for ($i = 1; $i <= 15; $i++) {
             } 
                 
                 
-                $roles = ['Client', 'Admin', 'Boutiquier'];
-
+            $roles = ['ROLE_CLIENT', 'ROLE_ADMIN', 'ROLE_BOUTIQUIER'];
                 foreach ($roles as $role) {
                     for ($i = 1; $i <= 8; $i++) {
                         $user = new User();
                         $user->setNom('Nom' . $role . $i);
                         $user->setPrenom('Prenom' . $role . $i);
         
-                        $user->setLogin(strtolower($role) . $i . uniqid() . '@exemple.com');
+                        $user->setLogin(uniqid('user_') . '@exemple.com');
+                        $user->setAdresse("Adresse" . $i);
                         $user->setTelephone('77' . str_pad($i, 7, '0', STR_PAD_LEFT));
-                        $user->setRoles([$role]);
+                        $user->setRoles([$role]);                        
                         $user->setPassword(password_hash('password', PASSWORD_BCRYPT));
         
                         $manager->persist($user);

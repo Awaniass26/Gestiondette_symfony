@@ -6,6 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
 
 class UserController extends AbstractController
 {
@@ -28,59 +31,98 @@ class UserController extends AbstractController
     }
 
 
-    #[Route('/admin/user/create', name: 'app_user_create')]
-    public function create(Request $request): Response
-    {
-        $user = new User();
-        $form = $this->createFormBuilder($user)
-            ->add('prenom', TextType::class)
-            ->add('nom', TextType::class)
-            ->add('telephone', TextType::class)
-            ->add('login', TextType::class)
-            ->add('password', PasswordType::class)
-            ->add('role', TextType::class) // Ou un select pour les rôles
-            ->add('save', SubmitType::class, ['label' => 'Create'])
-            ->getForm();
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+    #[Route('/admin/user/create', name: 'app_create_user', methods: ['POST'])]
+public function createUser(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $user = new User();
+    $user->setPrenom($request->request->get('Prenom'))
+         ->setNom($request->request->get('Nom'))
+         ->setAdresse($request->request->get('Adresse'))
+         ->setLogin($request->request->get('Login'))
+         ->setPassword($request->request->get('Password'));
 
-            return $this->redirectToRoute('app_user');
-        }
+    // Récupération des rôles, ou 'ROLE_CLIENT' par défaut si aucun rôle n'est spécifié
+    $roles = $request->request->get('roleInput'); // Utilisez 'roleInput' ici, pas 'roles'
+    if (!$roles) {
+        $roles = ['ROLE_CLIENT'];
+    }
+    $user->setRoles($roles);
 
-        return $this->render('user/create.html.twig', [
-            'form' => $form->createView(),
-        ]);
+    $file = $request->files->get('fileInput');
+    if ($file instanceof UploadedFile) {
+        // Définir le chemin d'enregistrement et déplacer le fichier
+        $uploadsDir = $this->getParameter('uploads_directory'); // Définir le paramètre dans services.yaml
+        $filename = uniqid() . '.' . $file->guessExtension();
+        $file->move($uploadsDir, $filename);
+
+        // Sauvegarder le nom du fichier dans l'entité utilisateur
+        $user->setPhoto($filename);
     }
 
-    #[Route('/admin/user/edit/{id}', name: 'app_user_edit')]
-    public function edit($id, UserRepository $userRepository, Request $request): Response
-    {
-        $user = $userRepository->find($id);
-        $form = $this->createFormBuilder($user)
-            ->add('prenom', TextType::class)
-            ->add('nom', TextType::class)
-            ->add('telephone', TextType::class)
-            ->add('login', TextType::class)
-            ->add('password', PasswordType::class)
-            ->add('role', TextType::class) // Ou un select pour les rôles
-            ->add('save', SubmitType::class, ['label' => 'Update'])
-            ->getForm();
+    $telephone = $request->request->get('Tel');
+    if ($telephone !== null) {
+        $user->setTelephone($telephone);
+    }
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
+    $entityManager->persist($user);
+    $entityManager->flush();
 
-            return $this->redirectToRoute('app_user');
+    return $this->redirectToRoute('app_user');
+}
+
+#[Route('/admin/user/{id}/edit', name: 'app_edit_user', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+public function editUser(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, $id = null): Response
+{
+    // Si on modifie un utilisateur existant, on récupère l'utilisateur par son id
+    $user = $id ? $userRepository->find($id) : new User();
+
+    if ($request->isMethod('POST')) {
+        // On met à jour l'utilisateur
+        $user->setPrenom($request->request->get('Prenom'))
+             ->setNom($request->request->get('Nom'))
+             ->setAdresse($request->request->get('Adresse'))
+             ->setLogin($request->request->get('Login'))
+             ->setPassword($request->request->get('Password'));
+
+        // Récupération des rôles
+        $roles = $request->request->get('roleInput');
+        if (!$roles) {
+            $roles = ['ROLE_CLIENT'];
+        }
+        $user->setRoles($roles);
+
+        $telephone = $request->request->get('Tel');
+        if ($telephone !== null) {
+            $user->setTelephone($telephone);
         }
 
-        return $this->render('user/edit.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        // Si un fichier est uploadé, on le gère ici
+        $file = $request->files->get('fileInput');
+        if ($file) {
+            $uploadsDir = $this->getParameter('uploads_directory');
+            $filename = uniqid() . '.' . $file->guessExtension();
+            $file->move($uploadsDir, $filename);
+            $user->setPhoto($filename);
+        }
+
+        // Enregistrer ou modifier dans la base
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        // Rediriger vers la liste des utilisateurs
+        return $this->redirectToRoute('app_user');
     }
+    dd('isEdit');
+    // On envoie l'utilisateur au formulaire pour modification ou ajout
+    return $this->render('user/index.html.twig', [
+        'user' => $user, // On passe l'utilisateur pour remplir les champs en cas de modification
+        'isEdit' => $id !== null, // Si id est passé, c'est un formulaire de modification
+    ]);
+}
+
+
+
+   
 }
 
