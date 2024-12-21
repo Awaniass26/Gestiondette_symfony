@@ -42,4 +42,34 @@ class ArticleController extends AbstractController
             'totalPages' => $totalPages,
         ]);
     }
+
+
+
+    #[Route('/save-selected-products', name: 'app_save_selected_products', methods:"POST")]
+
+    public function saveSelectedProducts(Request $request, EntityManagerInterface $em)
+    {
+        $data = json_decode($request->getContent(), true);
+        $selectedProducts = $data['products'];
+
+        // Enregistrez les produits dans la base de données
+        foreach ($selectedProducts as $productData) {
+            $product = new Article();
+            $product->setNomArticle($productData['name']);
+            $product->setPrix($productData['price']);
+            $product->setQuantiteRestante($productData['quantity']);
+
+            $em->persist($product);
+        }
+
+        $em->flush();
+
+        // Retourner une réponse JSON avec les produits mis à jour
+        $updatedProducts = $em->getRepository(Article::class)->findAll();
+
+        return new JsonResponse([
+            'success' => true,
+            'updatedProducts' => $updatedProducts,
+        ]);
+    }
 }

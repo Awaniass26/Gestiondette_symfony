@@ -145,7 +145,7 @@
 								<th class="px-6 py-3 text-center">ACTION</th>
 							</tr>
 						</thead>
-						<tbody class="text-gray-700">
+						<tbody class="text-gray-700" id="clientTableBody">
 							{% for client in clients %}
 								<tr class="border-t">
 									<td class="px-6 py-4 text-center">{{ client.prenom }}
@@ -316,84 +316,86 @@
 
 
 					document.addEventListener('DOMContentLoaded', () => {
-					const clientForm = document.querySelector('#clientModal form');
-					const clientTableBody = document.querySelector('table tbody');
+    const clientForm = document.querySelector('#clientModal form');
+    const clientTableBody = document.querySelector('table tbody');
 
-					// Fonction pour récupérer les clients stockés dans le localStorage
-					function loadClients() {
-					const clients = JSON.parse(localStorage.getItem('clients')) || [];
-					clients.forEach(client => {
-					addClientToTable(client);
-					});
-					}
 
-					// Fonction pour ajouter un client dans la table
-					function addClientToTable(client) {
-					const newRow = document.createElement('tr');
-					newRow.classList.add('border-t');
-					newRow.innerHTML = `
-								<td class="px-6 py-4 text-center">${
-					client.prenom
-					} ${
-					client.nom
-					}</td>
-								<td class="px-6 py-4 text-center">${
-					client.telephone
-					}</td>
-								<td class="px-6 py-4 text-center">${
-					client.adresse
-					}</td>
-								<td class="px-6 py-4 text-center">0 FCFA</td>
-								<td class="px-6 py-4 text-center">
-									<button class="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 details-btn" data-telephone="${
-					client.telephone
-					}">
-										Détails
-									</button>
-								</td>
-							`;
-					clientTableBody.appendChild(newRow);
-					}
+function loadClients() {
+    fetch('/boutiquier/client')  // Utilisez la même route
+        .then(response => response.json())
+        .then(data => {
+            data.clients.forEach(client => {
+                addClientToTable(client);
+            });
+        });
+}
 
-					// Charger les clients existants dans le localStorage lorsque la page est chargée
-					loadClients();
 
-					// Gestion du formulaire de création de client
-					clientForm.addEventListener('submit', (event) => {
-					event.preventDefault();
+    // Fonction pour ajouter un client dans la table
+    function addClientToTable(client) {
+        const newRow = document.createElement('tr');
+        newRow.classList.add('border-t');
+        newRow.innerHTML = `
+            <td class="px-6 py-4 text-center">${client.prenom} ${client.nom}</td>
+            <td class="px-6 py-4 text-center">${client.telephone}</td>
+            <td class="px-6 py-4 text-center">${client.adresse}</td>
+            <td class="px-6 py-4 text-center">0 FCFA</td>
+            <td class="px-6 py-4 text-center">
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 details-btn" data-telephone="${client.telephone}">
+                    Détails
+                </button>
+            </td>
+        `;
+        clientTableBody.appendChild(newRow);
+    }
 
-					// Récupérer les valeurs des champs du formulaire
-					const nom = document.querySelector('#nom').value.trim();
-					const prenom = document.querySelector('#prenom').value.trim();
-					const telephone = document.querySelector('#telephone').value.trim();
-					const adresse = document.querySelector('#adresse').value.trim();
+    // Gestion du formulaire de création de client
+    clientForm.addEventListener('submit', (event) => {
+        event.preventDefault();
 
-					// Vérification de validité des champs
-					if (! nom || ! prenom || ! telephone || ! adresse) {
-					alert('Veuillez remplir tous les champs.');
-					return;
-					}
+        // Récupérer les valeurs des champs du formulaire
+        const nom = document.querySelector('#nom').value.trim();
+        const prenom = document.querySelector('#prenom').value.trim();
+        const telephone = document.querySelector('#telephone').value.trim();
+        const adresse = document.querySelector('#adresse').value.trim();
 
-					// Créer un objet client
-					const client = {
-					nom,
-					prenom,
-					telephone,
-					adresse
-					};
+        // Vérification de validité des champs
+        if (!nom || !prenom || !telephone || !adresse) {
+            alert('Veuillez remplir tous les champs.');
+            return;
+        }
 
-					// Ajouter le client à la table
-					addClientToTable(client);
+        // Créer un objet client
+        const client = {
+            nom,
+            prenom,
+            telephone,
+            adresse
+        };
 
-					// Sauvegarder le client dans le localStorage
-					const clients = JSON.parse(localStorage.getItem('clients')) || [];
-					clients.push(client);
-					localStorage.setItem('clients', JSON.stringify(clients));
+        // Envoyer les données au backend via fetch
+        fetch('/boutiquier/client', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(client)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addClientToTable(data.client);  // Ajouter le client dans la table
+                clientForm.reset();  // Réinitialiser le formulaire
+                document.querySelector('[data-modal-hide="clientModal"]').click();  // Fermer le modal
+            } else {
+                alert('Erreur lors de l\'ajout du client.');
+            }
+        });
+    });
 
-					// Réinitialiser le formulaire et fermer le modal
-					clientForm.reset();
-					document.querySelector('[data-modal-hide="clientModal"]').click();
-					});
+    loadClients();
+});
+
 
 					// Gestion du clic sur le bouton Détails (non fonctionnel dans cet exemple, mais vous pouvez l'implémenter)
 					clientTableBody.addEventListener('click', (event) => {
@@ -407,21 +409,5 @@
 					});
 
 
-					});
-
-
-					// Gestion du toggle pour création de compte
-					function toggleAccountFields() {
-					const accountFields = document.getElementById('accountFields');
-					const toggleLabel = document.getElementById('toggleLabel');
-					const isChecked = document.getElementById('creerCompte').checked;
-
-					if (isChecked) {
-					accountFields.classList.remove('hidden');
-					toggleLabel.textContent = 'Oui';
-					} else {
-					accountFields.classList.add('hidden');
-					toggleLabel.textContent = 'Non';
-					}
-					}
+					
 					</script>{% endblock %}

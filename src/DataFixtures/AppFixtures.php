@@ -207,6 +207,8 @@ for ($i = 1; $i <= 15; $i++) {
                         $user->setTelephone('77' . str_pad($i, 7, '0', STR_PAD_LEFT));
                         $user->setRoles([$role]);                        
                         $user->setPassword(password_hash('password', PASSWORD_BCRYPT));
+                        $user->setPhoto('uploads/photos/tree.jpg');
+
         
                         $manager->persist($user);
                     }

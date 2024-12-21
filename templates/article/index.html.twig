@@ -92,9 +92,9 @@
 										<input type="checkbox" class="product-checkbox" data-id="{{ article.id }}" data-name="{{ article.nomArticle }}" data-price="{{ article.prix }}" data-stock="{{ article.quantiteRestante }}" onclick="updateSelectedProducts()">
 
 									</td>
-									<td class="py-2 px-4 text-center">{{ article.nomArticle }}</td>
-									<td class="py-2 px-4 text-center">{{ article.prix }}</td>
-									<td class="py-2 px-4 text-center">{{ article.quantiteRestante }}</td>
+									<td class="py-2 px-4 text-center product-name">{{ article.nomArticle }}</td>
+									<td class="py-2 px-4 text-center product-name">{{ article.prix }}</td>
+									<td class="py-2 px-4 text-center product-name">{{ article.quantiteRestante }}</td>
 								</tr>
 							{% else %}
 								<tr>
@@ -194,10 +194,6 @@
 					<option value="electronique">Electronique</option>
 				</select>
 			</div>
-			<div class="mb-4">
-				<label for="promotion" class="block text-sm font-medium text-gray-700">Promotion</label>
-				<input type="text" id="promotion" class="block w-full p-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-			</div>
 		</div>
 		<!-- Modal footer -->
 		<div class="flex justify-end p-6 space-x-2 border-t modal-footer">
@@ -209,7 +205,7 @@
 
 let selectedProducts = [];
 let currentPage = 1;
-const productsPerPage = 5; // Nombre de produits par page
+const productsPerPage = 5; 
 
 function updateSelectedProducts() {
     const checkboxes = document.querySelectorAll('.product-checkbox');
@@ -234,11 +230,9 @@ function updateSelectedProducts() {
 
 function updateTotalPrice() {
     let totalPrice = 0;
-    // Loop through selected products and calculate the total price
     selectedProducts.forEach(product => {
         totalPrice += product.price * product.quantity;
     });
-    // Update the total price display
     document.getElementById('total-price').value = totalPrice.toFixed(2);
 }
 
@@ -248,7 +242,6 @@ function renderSelectedProducts() {
     tbody.innerHTML = '';
     let totalPrice = 0;
 
-    // Calculer l'index des produits à afficher en fonction de la page actuelle
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
     const pageProducts = selectedProducts.slice(startIndex, endIndex);
@@ -293,21 +286,62 @@ function removeProduct(index) {
 }
 
 function saveSelectedProducts() {
-    if (selectedProducts.length > 0) {
-        // Sauvegarder les produits dans le localStorage
-        localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+    const selectedProducts = [];
+    const rows = document.querySelectorAll('#selected-products-table tbody tr');
+    
+    rows.forEach(row => {
+        const product = {
+            id: row.dataset.id,
+            name: row.querySelector('.product-name').textContent,
+            price: row.querySelector('.product-price').textContent,
+            quantity: row.querySelector('.product-quantity').textContent
+        };
+        selectedProducts.push(product);
+    });
 
-        // Afficher un message de succès
-        alert('Les produits ont été sauvegardés dans le localStorage !');
-    } else {
-        alert('Aucun produit sélectionné.');
-    }
+    // Envoi des données via AJAX
+    fetch('{{ path('app_save_selected_products') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ products: selectedProducts })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Produits enregistrés avec succès');
+            // Mettez à jour la première liste des produits
+            updateProductList(data.updatedProducts);
+        } else {
+            alert('Une erreur est survenue lors de l\'enregistrement.');
+        }
+    })
+    .catch(error => console.error('Erreur:', error));
 }
+
+// Fonction pour mettre à jour la liste des produits
+function updateProductList(updatedProducts) {
+    const tableBody = document.querySelector('#product-table tbody');
+    tableBody.innerHTML = ''; // Vider la table existante
+    
+    updatedProducts.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="p-2 text-center"><input type="checkbox" class="product-checkbox" data-id="${product.id}" data-name="${product.nomArticle}" data-price="${product.prix}" data-stock="${product.quantiteRestante}" onclick="updateSelectedProducts()"></td>
+            <td class="py-2 px-4 text-center">${product.nomArticle}</td>
+            <td class="py-2 px-4 text-center">${product.prix}</td>
+            <td class="py-2 px-4 text-center">${product.quantiteRestante}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
 
 function updatePagination() {
     const totalPages = Math.ceil(selectedProducts.length / productsPerPage);
 
-    // Désactiver les boutons si nécessaire
     document.querySelector('[onclick="goToPage(currentPage - 1)"]').disabled = currentPage === 1;
     document.querySelector('[onclick="goToPage(currentPage + 1)"]').disabled = currentPage === totalPages;
 
@@ -335,10 +369,8 @@ function loadProducts() {
     const savedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
     const productTableBody = document.querySelector("#product-table tbody");
 
-    // Effacez le contenu actuel du tableau
     productTableBody.innerHTML = '';
 
-    // Ajoutez les produits sauvegardés dans le tableau
     savedProducts.forEach(product => {
         const row = document.createElement('tr');
 
@@ -358,24 +390,20 @@ function loadProducts() {
 }
 
 
-// Variables
 const openModalBtn = document.getElementById('openArticleModal');
 const closeModalBtn = document.getElementById('closeModal');
 const cancelBtn = document.getElementById('cancelBtn');
 const saveBtn = document.getElementById('saveBtn');
 const modal = document.getElementById('articleModal');
 
-// Ouvrir le modal
 openModalBtn.addEventListener('click', () => {
   modal.classList.remove('hidden');
 });
 
-// Fermer le modal
 closeModalBtn.addEventListener('click', () => {
   modal.classList.add('hidden');
 });
 
-// Annuler
 cancelBtn.addEventListener('click', () => {
   modal.classList.add('hidden');
 });
@@ -393,7 +421,6 @@ const libelle = document.getElementById('libelle').value;
   const promotion = document.getElementById('promotion').value;
 
   if (libelle && prixUnitaire && quantite && prixDetails && categorie) {
-    // Ajouter l'article à la liste des produits (first list)
     const newProduct = {
       libelle,
       prixUnitaire,
@@ -405,7 +432,6 @@ const libelle = document.getElementById('libelle').value;
     
     console.log('Article enregistré :', newProduct);
 
-    // Vous pouvez ajouter ici l'article à une liste d'articles existante dans votre application
 
     modal.classList.add('hidden');
   } else {
@@ -416,32 +442,26 @@ const libelle = document.getElementById('libelle').value;
 
 
 
-    // Fonction pour ajouter l'article créé dans la liste
     document.getElementById('submit-article').addEventListener('click', function() {
-        // Récupérer les valeurs des champs
         var libelle = document.getElementById('libelle').value;
         var prixUnitaire = document.getElementById('prixUnitaire').value;
         var quantite = document.getElementById('quantite').value;
         var prixDetails = document.getElementById('prixDetails').value;
         var categories = document.getElementById('categories').value;
 
-        // Créer une nouvelle ligne pour la table des produits
         var table = document.getElementById('product-table').getElementsByTagName('tbody')[0];
         var newRow = table.insertRow(table.rows.length);
 
-        // Ajouter les cellules dans la nouvelle ligne
         var cell1 = newRow.insertCell(0);
         var cell2 = newRow.insertCell(1);
         var cell3 = newRow.insertCell(2);
         var cell4 = newRow.insertCell(3);
 
-        // Remplir les cellules avec les valeurs de l'article
         cell1.innerHTML = '<input type="checkbox" class="product-checkbox" data-name="' + libelle + '" data-price="' + prixUnitaire + '" data-stock="' + quantite + '" onclick="updateSelectedProducts()">';
         cell2.innerHTML = libelle;
         cell3.innerHTML = prixUnitaire;
         cell4.innerHTML = quantite;
 
-        // Fermer le modal après avoir ajouté l'article
         document.getElementById('articleModal').style.display = 'none';
 
         // Réinitialiser les champs du formulaire
