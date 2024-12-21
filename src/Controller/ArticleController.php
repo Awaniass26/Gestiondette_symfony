@@ -52,7 +52,6 @@ class ArticleController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $selectedProducts = $data['products'];
 
-        // Enregistrez les produits dans la base de données
         foreach ($selectedProducts as $productData) {
             $product = new Article();
             $product->setNomArticle($productData['name']);
@@ -64,7 +63,6 @@ class ArticleController extends AbstractController
 
         $em->flush();
 
-        // Retourner une réponse JSON avec les produits mis à jour
         $updatedProducts = $em->getRepository(Article::class)->findAll();
 
         return new JsonResponse([

@@ -86,7 +86,6 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				<!-- Pagination for Articles -->
 				<div class="mt-4 flex justify-end space-x-1">
 					<button class="bg-gray-200 text-gray-600 py-1 px-3 rounded-l-md hover:bg-gray-300 focus:outline-none" {% if page == 1 %} disabled {% endif %} onclick="window.location.href='?page={{ page - 1 }}'">
 						&lt;
@@ -125,7 +124,6 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				<!-- Pagination for Paiements -->
 				<div class="mt-4 flex justify-end space-x-1">
 					<button class="bg-gray-200 text-gray-600 py-1 px-3 rounded-l-md hover:bg-gray-300 focus:outline-none" {% if pagePaiement == 1 %} disabled {% endif %} onclick="window.location.href='?page_paiement={{ pagePaiement - 1 }}'">
 						&lt;

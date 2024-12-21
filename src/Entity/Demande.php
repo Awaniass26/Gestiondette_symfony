@@ -39,6 +39,12 @@ class Demande
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
 
+    #[ORM\Column]
+    private ?float $montantVerse = null;
+
+    #[ORM\Column]
+    private ?float $montantRestant = null;
+
     public function __construct()
     {
         $this->demandeArticles = new ArrayCollection();
@@ -158,5 +164,29 @@ class Demande
         return $demandeArticle->getArticle();
     });
 }
+
+    public function getMontantVerse(): ?float
+    {
+        return $this->montantVerse;
+    }
+
+    public function setMontantVerse(float $montantVerse): static
+    {
+        $this->montantVerse = $montantVerse;
+
+        return $this;
+    }
+
+    public function getMontantRestant(): ?float
+    {
+        return $this->montantRestant;
+    }
+
+    public function setMontantRestant(float $montantRestant): static
+    {
+        $this->montantRestant = $montantRestant;
+
+        return $this;
+    }
 
 }

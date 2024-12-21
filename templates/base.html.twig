@@ -369,108 +369,102 @@
 							</div>
 						</div>
 						{% if 'ROLE_CLIENT' in app.user.roles %}
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_mesdemandes') }}">
-								<i class="fas fa-envelope text-lg mr-3"></i>
-								Demandes
-							</a>
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_dettelist') }}">
-								<i class="fas fa-dollar-sign text-lg mr-3"></i>
-								Dettes
-							</a>
-						{% elseif 'ROLE_ADMIN' in app.user.roles %}
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_dashboard') }}">
-								<i class="fas fa-tachometer-alt text-lg mr-3"></i>
-								Dashboard</a>
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_user') }}">
-								<i class="fas fa-user text-lg mr-3"></i>
-								Utilisateurs
-							</a>
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_article') }}">
-								<i class="fas fa-box text-lg mr-3"></i>
-								Articles
-							</a>
-						{% elseif 'ROLE_BOUTIQUIER' in app.user.roles %}
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_dette') }}">
-								<i class="fas fa-dollar-sign text-lg mr-3"></i>
-								Dettes
-							</a>
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_client') }}">
-								<i class="fas fa-users text-lg mr-3"></i>
-								Clients
-							</a>
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_article') }}">
-								<i class="fas fa-box text-lg mr-3"></i>
-								Articles
-							</a>
-							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_demande') }}">
-								<i class="fas fa-envelope text-lg mr-3"></i>
-								Demandes
-							</a>
-						{% endif %}
+							<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_mesdemandes', {'id': client.id}) }}">
+							<i class="fas fa-envelope text-lg mr-3"></i>
+							Demandes
+						</a>
+						<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_dettelist', {'telephone': client.telephone}) }}"> 
+						<i class="fas fa-dollar-sign text-lg mr-3"></i>
+						Dettes
+					</a>
+				{% elseif 'ROLE_ADMIN' in app.user.roles %}
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_dashboard') }}">
+						<i class="fas fa-tachometer-alt text-lg mr-3"></i>
+						Dashboard</a>
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_user') }}">
+						<i class="fas fa-user text-lg mr-3"></i>
+						Utilisateurs
+					</a>
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_article') }}">
+						<i class="fas fa-box text-lg mr-3"></i>
+						Articles
+					</a>
+				{% elseif 'ROLE_BOUTIQUIER' in app.user.roles %}
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_dette') }}">
+						<i class="fas fa-dollar-sign text-lg mr-3"></i>
+						Dettes
+					</a>
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_client') }}">
+						<i class="fas fa-users text-lg mr-3"></i>
+						Clients
+					</a>
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_article') }}">
+						<i class="fas fa-box text-lg mr-3"></i>
+						Articles
+					</a>
+					<a class="block px-4 py-2 mt-2 text-sm font-semibold text-white hover:bg-gray-600" href="{{ path('app_demande') }}">
+						<i class="fas fa-envelope text-lg mr-3"></i>
+						Demandes
+					</a>
+				{% endif %}
 
-					</div>
-					<!-- Contenu principal -->
-					<div class="content">
-						<header class="flex flex-col sm:flex-row justify-between items-center bg-white shadow-md px-4 py-2 header ml-5">
-							<div class="p-4 flex items-center h-32 md:hidden">
-								<svg class="w-20 h-20 mr-2" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<rect width="40" height="24" rx="4" fill="white"/>
-									<path d="M17 8H7C5.89543 8 5 8.89543 5 10V16C5 17.1046 5.89543 18 7 18H17C18.1046 18 19 17.1046 19 16V10C19 8.89543 18.1046 8 17 8Z" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-									<path d="M12 12C12.5523 12 13 11.5523 13 11C13 10.4477 12.5523 10 12 10C11.4477 10 11 10.4477 11 11C11 11.5523 11.4477 12 12 12Z" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-									<path d="M16 16H8" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-								</svg>
-								<div class="flex flex-col text-gray-800 font-bold text-xl">
-									<span>GESTION</span>
-									<span>BOUTIQUE</span>
-								</div>
-							</div>
-							<!-- Barre de recherche globale -->
-							<div class="search-bar flex items-center w-full sm:w-1/2 lg:w-3/5 mb-2 sm:mb-0">
-								<input type="text" placeholder="Rechercher dans votre boutique..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm sm:text-base"/>
-							</div>
-
-							<!-- Informations utilisateur -->
-							<button class="header-user flex items-center mt-2 sm:mt-0" data-popover-target="popover-bottom" data-popover-placement="bottom" type="button" data-popover-trigger="click">
-								{% if app.user and app.user.photo %}
-
-									<img src="{{ asset(app.user.photo) }}" alt="Image de profil" class="w-40 h-40 rounded-full border-2">
-								{% endif %}
-								{# <div class="pl-2 sm:pl-4 py-1 ml-2">
-									{% if app.user %}
-										{{ app.user.nom }}
-										{{ app.user.prenom }}
-									{% else %}
-										Utilisateur non connecté
-									{% endif %}
-								</div> #}
-							</button>
-							<!-- Popover pour les informations utilisateur (inchangé) -->
-							<div data-popover id="popover-bottom" role="tooltip" class="absolute right-2 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 invisible" style="top: 3rem">
-								<div class="px-4 py-2 text-center">
-									<img class="w-16 h-16 rounded-full mx-auto" src="{{ asset(app.user.photo) }}" alt="User avatar"/>
-									{% if app.user %}
-										<p class="mt-2 font-semibold">{{ app.user.userIdentifier }}</p>
-									{% else %}
-										<div>
-											You are not logged in.
-										</div>
-									{% endif %}
-								</div>
-								<a href="{{ path('app_logout') }}" class="block px-4 py-2 text-sm text-center text-gray-700 hover:bg-gray-100">DECONNEXION</a>
-							</div>
-						</header>
-					{% endblock %}
-
-					<main>
-						{% block body %}{% endblock %}
-					</main>
-
-				</div>
 			</div>
-		</header>
+			<!-- Contenu principal -->
+			<div class="content">
+				<header class="flex flex-col sm:flex-row justify-between items-center bg-white shadow-md px-4 py-2 header ml-5">
+					<div class="p-4 flex items-center h-32 md:hidden">
+						<svg class="w-20 h-20 mr-2" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<rect width="40" height="24" rx="4" fill="white"/>
+							<path d="M17 8H7C5.89543 8 5 8.89543 5 10V16C5 17.1046 5.89543 18 7 18H17C18.1046 18 19 17.1046 19 16V10C19 8.89543 18.1046 8 17 8Z" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M12 12C12.5523 12 13 11.5523 13 11C13 10.4477 12.5523 10 12 10C11.4477 10 11 10.4477 11 11C11 11.5523 11.4477 12 12 12Z" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M16 16H8" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+						<div class="flex flex-col text-gray-800 font-bold text-xl">
+							<span>GESTION</span>
+							<span>BOUTIQUE</span>
+						</div>
+					</div>
+					<!-- Barre de recherche globale -->
+					<div class="search-bar flex items-center w-full sm:w-1/2 lg:w-3/5 mb-2 sm:mb-0">
+						<input type="text" placeholder="Rechercher dans votre boutique..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm sm:text-base"/>
+					</div>
 
-		{% block javascripts %}
-			{{ encore_entry_script_tags('app') }}
-		{% endblock %}
+					<!-- Informations utilisateur -->
+					<button class="header-user flex items-center mt-2 sm:mt-0" data-popover-target="popover-bottom" data-popover-placement="bottom" type="button" data-popover-trigger="click">
+						{% if app.user and app.user.photo %}
+
+							<img src="{{ asset(app.user.photo) }}" alt="Image de profil" class="w-40 h-40 rounded-full border-2">
+						{% endif %}
+						{# <div class="pl-2 sm:pl-4 py-1 ml-2">
+																						{% if app.user %}
+																							{{ app.user.nom }}
+																							{{ app.user.prenom }}
+																						{% else %}
+																							Utilisateur non connecté
+																						{% endif %}
+																					</div> #}
+					</button>
+					<!-- Popover pour les informations utilisateur (inchangé) -->
+					<div data-popover id="popover-bottom" role="tooltip" class="absolute right-2 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 invisible" style="top: 3rem">
+						<div class="px-4 py-2 text-center">
+							<img class="w-16 h-16 rounded-full mx-auto" src="{{ asset(app.user.photo) }}" alt="User avatar"/>
+							{% if app.user %}
+								<p class="mt-2 font-semibold">{{ app.user.userIdentifier }}</p>
+							{% else %}
+								<div>
+									You are not logged in.
+								</div>
+							{% endif %}
+						</div>
+						<a href="{{ path('app_logout') }}" class="block px-4 py-2 text-sm text-center text-gray-700 hover:bg-gray-100">DECONNEXION</a>
+					</div>
+				</header>
+			{% endblock %}
+
+			<main>
+				{% block body %}{% endblock %}
+			</main>
+
+		</div>
 	</body>
-</html>
+</html></div></body></html></header>{% block javascripts %}{{ encore_entry_script_tags('app') }}{% endblock %}</body></html>

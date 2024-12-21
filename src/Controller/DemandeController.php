@@ -10,10 +10,24 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Demande;
 use App\Entity\DemandeArticle;
+use App\Entity\Client;
+use App\Repository\ClientRepository;
+use App\Repository\DemandeRepository;
 
 
 class DemandeController extends AbstractController
 {
+    private ClientRepository $clientRepository;
+    private DemandeRepository $demandeRepository;
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(ClientRepository $clientRepository, DemandeRepository $demandeRepository, EntityManagerInterface $entityManager)
+    {
+        $this->clientRepository = $clientRepository;
+        $this->demandeRepository = $demandeRepository;
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/boutiquier/demande', name: 'app_demande')]
 public function index(Request $request, EntityManagerInterface $entityManager): Response
 {
@@ -104,5 +118,36 @@ public function details(int $id, EntityManagerInterface $entityManager,Request $
         'totalPages' => $totalPages,
     ]);
 }
+
+
+#[Route('/client/{id}/demandes', name: 'app_mesdemandes')]
+    public function mesDemandes(int $id): Response
+    {
+        $client = $this->clientRepository->find($id);
+
+        if (!$client) {
+            throw $this->createNotFoundException('Client not found');
+        }
+
+        $demandes = $this->demandeRepository->findBy(['client' => $client]);
+
+        $montantTotal = 0;
+        $montantVerse = 0;
+        $montantRestant = 0;
+    
+        foreach ($demandes as $demande) {
+            $montantTotal += $demande->getMontant();
+            $montantVerse += $demande->getMontantVerse(); 
+            $montantRestant += $demande->getMontantRestant(); 
+        }
+
+        return $this->render('client/demande.html.twig', [
+            'client' => $client,
+            'demandes' => $demandes,
+            'montantTotal' => $montantTotal, 
+            'montantVerse' => $montantVerse, 
+            'montantRestant' => $montantRestant,
+        ]);
+    }
 
 }

@@ -77,9 +77,44 @@ for ($i = 1; $i <= 15; $i++) {
 
             $manager->persist($client);
             $this->addReference('client_' . $i, $client);
-         }
+        }
 
-            $manager->flush();  
+        $manager->flush();
+
+            for ($j = 0; $j < 28; $j++) {
+                $demande = new Demande();
+                $demande->setDateAt(new \DateTimeImmutable());
+                $montant = rand(1000, 100000);
+                $demande->setMontant($montant);                $montantVerse = rand(0, $montant);  
+                $montantRestant = $montant - $montantVerse;
+
+                $demande->setMontantVerse($montantVerse);
+                $demande->setMontantRestant($montantRestant);
+            
+                $statut = rand(0, 2);
+                $statutDemande = $statut == 0 ? 'En cours' : ($statut == 1 ? 'Annulé' : 'Accepté');
+                $demande->setStatut($statutDemande);
+            
+                $client = $this->getReference('client_' . rand(1, 20));
+                $nomComplet = $client->getNom() . ' ' . $client->getPrenom();
+                $demande->setNomComplet($nomComplet); 
+            
+                $demande->setTelephone($client->getTelephone());
+                $demande->setClient($client);
+            
+                for ($k = 0; $k < 15; $k++) {
+                    $demandeArticle = new DemandeArticle();
+                    $demandeArticle->setDemande($demande);
+                    $demandeArticle->setArticle($articlesDisponibles[array_rand($articlesDisponibles)]);
+                    $demandeArticle->setQuantite(rand(1, 10));
+            
+                    $manager->persist($demandeArticle);
+                }
+                $manager->persist($demande);
+            }
+            
+    
+
 
             for ($i = 1; $i <= 10; $i++) {
                 $client = $this->getReference('client_' . $i);
@@ -99,25 +134,21 @@ for ($i = 1; $i <= 15; $i++) {
             $manager->flush(); 
 
 
-            for ($i = 1; $i <= 20; $i++) { // Pour chaque client
+            for ($i = 1; $i <= 20; $i++) { 
                 $client = $this->getReference('client_' . $i);
             
-                // 8 dettes non soldées
                 for ($j = 0; $j < 8; $j++) {
                     $detteNonSoldee = new Dette();
                     $detteNonSoldee->setDateAt(new \DateTimeImmutable());
             
-                    // Définir les montants
                     $montantTotal = rand(1000, 100000);
                     $montantVerse = rand(0, $montantTotal - 1);
                     $detteNonSoldee->setMontant($montantTotal);
                     $detteNonSoldee->setMontantVerse($montantVerse);
                     $detteNonSoldee->setMontantRestant($montantTotal - $montantVerse);
             
-                    // Associer le client
                     $detteNonSoldee->setClient($client);
             
-                    // Ajouter des articles à la dette
                     $nombreArticles = rand(1, 5);
                     for ($k = 0; $k < $nombreArticles; $k++) {
                         $article = $articlesDisponibles[array_rand($articlesDisponibles)];
@@ -134,21 +165,17 @@ for ($i = 1; $i <= 15; $i++) {
                     $manager->persist($detteNonSoldee);
                 }
             
-                // 4 dettes soldées
                 for ($j = 0; $j < 4; $j++) {
                     $detteSoldee = new Dette();
                     $detteSoldee->setDateAt(new \DateTimeImmutable());
             
-                    // Montant soldé
                     $montantTotal = rand(1000, 100000);
                     $detteSoldee->setMontant($montantTotal);
                     $detteSoldee->setMontantVerse($montantTotal);
                     $detteSoldee->setMontantRestant(0);
             
-                    // Associer le client
                     $detteSoldee->setClient($client);
             
-                    // Ajouter des articles à la dette
                     $nombreArticles = rand(1, 5);
                     for ($k = 0; $k < $nombreArticles; $k++) {
                         $article = $articlesDisponibles[array_rand($articlesDisponibles)];
@@ -216,8 +243,5 @@ for ($i = 1; $i <= 15; $i++) {
         
                 $manager->flush();
                            
-    }
-
-
-
-}
+            }
+        }

@@ -14,15 +14,21 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use App\Repository\ClientRepository;
+
 
 class LoginAuthentificatorAuthenticator extends AbstractLoginFormAuthenticator
 {
+    private ClientRepository $clientRepository;
+
     use TargetPathTrait;
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
+    public function __construct(private UrlGeneratorInterface $urlGenerator,ClientRepository $clientRepository)
     {
+        $this->clientRepository = $clientRepository;
+
     }
 
     public function authenticate(Request $request): Passport
@@ -54,7 +60,7 @@ class LoginAuthentificatorAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->urlGenerator->generate('app_client')); // Remplacez par votre route
         } elseif (in_array('ROLE_CLIENT', $roles)) {
             if ($user) {
-    $client = $this->clientRepository->findOneBy(['compte' => $user]); // Associez le client à l'utilisateur
+         $client = $this->clientRepository->findOneBy(['compte' => $user]); // Associez le client à l'utilisateur
 }
             $telephone = $client->getTelephone();
             return new RedirectResponse($this->urlGenerator->generate('app_dettelist', [
